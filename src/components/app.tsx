@@ -9,12 +9,8 @@ import Header from './header';
 const App: FunctionalComponent = () => {
     return (
         <div id="preact_root">
-            <Header />
             <Router>
                 <Route path="/" component={Home} />
-                <Route path="/profile/" component={Profile} user="me" />
-                <Route path="/profile/:user" component={Profile} />
-                <NotFoundPage default />
             </Router>
         </div>
     );
