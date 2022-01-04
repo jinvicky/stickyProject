@@ -35,28 +35,35 @@
 	} // end of .imageBtn
 } // end of .baseLayout
 
-.moveableBox {
-	border: 1px solid red;
-	position: absolute;
-	user-select: none;
-	cursor: move;
-	z-index: 5;
-	display: inline-block;
+.moveableWrapper {
+	border: 1px solid black;
 
-	> img {
-		width: 300px;
-		height: 100px;
-		//TODO:: 이미지가 처음 로드되었을 때 이미지의 비율을 설정하기.
-	}
-	> .stick {
-		position: relative;
-		background-color: turquoise;
-		width: 2px;
-		height: 23px;
-		top: -59px;
-		margin: 0 auto;
+	.moveableBox {
+		border: 1px solid red;
+		position: absolute;
+		user-select: none;
+		cursor: move;
+		z-index: 5;
+		display: inline-block;
+
+		> img {
+			display: block; // how to remove white space under an image using css.
+			width: auto;
+			height: auto;
+			max-width: 500px;
+			max-height: 250px;
+		}
+		> .stick {
+			position: relative;
+			background-color: turquoise;
+			width: 2px;
+			height: 23px;
+			top: -59px;
+			margin: 0 auto;
+		}
 	}
 }
+
 .moveable {
 	background-color: rgb(255, 255, 255);
 	border: 2px solid turquoise;
@@ -64,9 +71,7 @@
 	width: 15px;
 	height: 15px;
 	position: absolute;
-	top: 0;
-	left: 0;
-	transform: translateZ(0px) translate(500px, 94px) rotate(0rad) scale(1);
+	transform: translateZ(0px) translate(70px, 50px) rotate(0rad) scale(1);
 
 	/*
 	동그라미 버튼들 
@@ -79,27 +84,19 @@
 		cursor: ne-resize;
 		background-color: red;
 		z-index: 5;
+		transform: translate(580px, 350px);
 	}
 
-	// &.moveE {
-	// 	right: -8px;
-	// 	bottom: 45%;
-	// 	cursor: e-resize;
-	// }
-	// &.moveW {
-	// 	left: -8px;
-	// 	bottom: 45%;
-	// 	cursor: w-resize;
-	// }
-	// &.moveS {
-	// 	bottom: -8px;
-	// 	left: 45%;
-	// 	cursor: s-resize;
-	// 	transform: translate(-45%, -8px);
-	// }
-	// &.moveN {
-	// 	top: -8px;
-	// 	left: 45%;
-	// 	cursor: n-resize;
-	// }
+	&.moveE {
+		cursor: e-resize;
+	}
+	&.moveW {
+		cursor: w-resize;
+	}
+	&.moveS {
+		cursor: s-resize;
+	}
+	&.moveN {
+		cursor: n-resize;
+	}
 }
