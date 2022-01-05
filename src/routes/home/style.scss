@@ -1,87 +1,122 @@
-@import "./mixin.scss";
+.root {
+	max-width: 1920px;
+	min-width: 1320px;
+	height: 1500px;
+	border: 1px solid rgb(69, 145, 25);
+	position: relative;
+	background-color: #ddd;
 
-.baseLayout {
-	@include baseLayout();
+	.sideBar {
+		background-color: rgb(255, 238, 218);
+		height: 900px;
+		position: fixed;
+		width: 280px;
+	}
 
-	.moveableBox {
-		border: 1px solid red;
-		position: absolute;
-		user-select: none;
-		cursor: move;
-		z-index: 5;
-		display: inline-block;
+	.baseLayout {
+		background-color: rgb(150, 150, 187);
+		width: 84.5%;
+		height: 900px;
+		margin-left: auto;
+		position: relative;
 
-		> .targetLine {
+		.canvas {
+			border: 1px solid #aca79f;
+			background-color: #bbb2b2;
+			width: 966px;
+			height: 600px;
 			position: relative;
-			background-color: turquoise;
-			width: 2px;
-			height: 23px;
-			top: 0px;
 			margin: 0 auto;
+			top: 200px;
 		}
-		> img {
-			display: block;
-			width: auto;
-			height: auto;
-			max-width: 500px;
-			max-height: 250px;
-		}
-	}
+		.imageBtn {
+			border: 1px solid purple;
+			color: purple;
+			font-weight: bold;
+			font-size: 20px;
+			padding: 15px 20px;
+			border-radius: 10px;
+			position: absolute;
+			top: 90px;
+			left: 45%;
+			cursor: pointer;
+			user-select: none;
 
-	.controlBtn {
-		background-color: rgb(255, 255, 255);
-		border: 2px solid turquoise;
-		border-radius: 50%;
-		width: 15px;
-		height: 15px;
-		position: relative;
-		top: -8px;
-		left: -6px;
+			&.active {
+				background-color: purple;
+				color: white;
+			}
+		} // end of .imageBtn
 
-		&.rotate {
-			display: block;
-			cursor: ne-resize;
-			background-color: red;
+		.moveableBox {
+			// border: 1px solid red;
+			position: absolute;
+			user-select: none;
+			cursor: move;
 			z-index: 5;
-			// transform: translate(380px, 350px);
+			display: inline-block;
+
+			> .targetLine {
+				position: relative;
+				background-color: turquoise;
+				width: 2px;
+				height: 23px;
+				top: 0px;
+				margin: 0 auto;
+			}
+			> img {
+				display: block;
+				width: auto;
+				height: auto;
+				max-width: 500px;
+				max-height: 250px;
+			}
 		}
 
-		&.moveE {
-			cursor: e-resize;
-			// position: fixed;
-		}
-		&.moveW {
-			cursor: w-resize;
-			top: 50%;
-			background-color: rgb(114, 114, 25);
-		}
-		&.moveS {
-			cursor: s-resize;
-		}
-		&.moveN {
-			cursor: n-resize;
-		}
+		.controlBtn {
+			background-color: rgb(255, 255, 255);
+			border: 2px solid turquoise;
+			border-radius: 50%;
+			width: 15px;
+			height: 15px;
+			position: relative;
+			top: -8px;
+			left: -6px;
 
-		&.moveNW {
-			cursor: nw-resize;
-		}
-	}
-	.controlTest {
-		border: 1px solid black;
-		position: relative;
-		bottom: 0;
-		height: 50px;
-		z-index: 9;
-	}
+			&.rotate {
+				display: block;
+				cursor: ne-resize;
+				background-color: red;
+				z-index: 5;
+				// transform: translate(380px, 350px);
+			}
 
-	.canvas {
-		@include canvas();
-	}
-	.imageBtn {
-		@include uploadButton();
+			&.moveE {
+				cursor: e-resize;
+				// position: fixed;
+			}
+			&.moveW {
+				cursor: w-resize;
+				top: 50%;
+				background-color: rgb(114, 114, 25);
+			}
+			&.moveS {
+				cursor: s-resize;
+			}
+			&.moveN {
+				cursor: n-resize;
+			}
 
-		&.active {
-			@include uploadButton(true);
+			&.moveNW {
+				cursor: nw-resize;
+			}
 		}
-	} // end of .imageBtn
-} // end of .baseLayout
+		.controlTest {
+			border: 1px solid black;
+			position: relative;
+			bottom: 0;
+			height: 50px;
+			z-index: 9;
+		}
+	} // end of .baseLayout
+}

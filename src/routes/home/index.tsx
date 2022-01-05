@@ -23,20 +23,28 @@ const Home: FunctionalComponent = () => {
     //DESC:: 무블 박스 pos값
     const [boxPos, setBoxPos] = useState({ top: 400, left: 480 });
 
-    //DESC:: rotate deg값
-    const [deg, setDeg] = useState(0);
 
     //DESC:: 이미지 안에서의 mouse pos값 
     const [cursor, setCursor] = useState({ x: 0, y: 0 });
 
-    //DESC:: control 버튼의 mouse pos값 
-    const [contCursor, setContCursor] = useState({ x: 0, y: 0 });
+
+    //DESC:: 회전모드 여부 체크.
+    const [rotate, setRotate] = useState(false);
+
+    //DESC:: 회전 deg값
+    const [deg, setDeg] = useState(0);
 
 
     //DESC:: 이미지를 이동시키는 함수
     const movePosOfBox = (e: MouseEvent) => {
-        if (mouseDown)
-            setBoxPos({ top: e.clientY - cursor.y, left: e.clientX - cursor.x });
+        const j = document.getElementById("moveSP"); //.baseLayout
+        const jin = j?.getBoundingClientRect();
+
+        if (mouseDown && jin !== undefined)
+            setBoxPos({
+                top: e.clientY - cursor.y - jin?.top,
+                left: e.clientX - cursor.x - jin?.left
+            });
     }
 
     //DESC:: 이미지를 회전시키는 함수
@@ -44,109 +52,93 @@ const Home: FunctionalComponent = () => {
 
         let center_x = boxPos.left;
         let center_y = boxPos.top;
-        let mouse_x = e.pageX;
+        //--------------------------------
+        let mouse_x = e.pageX; // TODO:: pageX,pageY  => BoundRect() + scrrenX,Y로 수정하기.
         let mouse_y = e.pageY;
 
         let radians = Math.atan2(mouse_x - center_x, mouse_y - center_y);
         var degree = (radians * (180 / Math.PI) * -1) + 90;
-        console.log("deg: ", degree);
 
-        if (control) {
-            setDeg(degree);
-        }
-        //TODO:: control-rotate 버튼을 눌렀을 때만 회전값이 적용이 되도록 수정해야 함.
+        //회전 각도를 적용한다.
+        setDeg(degree);
     }
-
-
-    //DESC:: 선택 시 생기는 동그라미 버튼 onMouseDown했을 때 함수
-    const controlMouseDown = (e: MouseEvent) => {
-        setMouseDown(true);
-        setIsPointer(true);
-    }
-
 
     return <Fragment>
-        <div class={style.baseLayout}
-            // onMouseDown={(e) => rotateBox(e)}
-            onMouseMove={(e) => {
-                movePosOfBox(e);
-                // rotateBox(e);
-            }}
-            onMouseUp={() => {
-                setMouseDown(false);
-            }}
-        >
-            {file && <>
-                <div class={style.moveableBox} // target element
-                    id="moveable"
-                    style={{
-                        top: boxPos.top,
-                        left: boxPos.left,
-                        transform: `rotate(${deg}deg)`,
-                    }}
-                    onMouseDown={e => setCursor({ x: e.offsetX, y: e.offsetY })}
-                >
-                    <div class={style.targetLine}>
-                        {/* {control && */}
-                        <>
+        <div class={style.root}>
+            <div class={style.sideBar} />
+            <div class={style.baseLayout}
+                id="moveSP"
+                onMouseMove={(e) => {
+                    movePosOfBox(e);
+                    //2. 회전 모드면 박스를 돌린다.
+                    if (rotate) rotateBox(e);
+                }}
+                onMouseUp={() => {
+                    setMouseDown(false);
+                    //3. 마우스를 뗐을 때 회전모드면 회전모드 종료시키기. 
+                    if (rotate) setRotate(false);
+                }}
+            >
+                {file && <>
+                    <div class={style.moveableBox}
+                        style={{
+                            top: boxPos.top,
+                            left: boxPos.left,
+                            transform: `rotate(${deg}deg)`,
+                        }}
+                    >
+                        <div class={style.targetLine}>
                             <div
                                 id="control"
                                 class={[style.controlBtn, style.rotate].join(" ")}
-                                onMouseDown={(e) => {
-                                    // rotateBox(e);
-                                    setControl(true);
-                                    setIsPointer(true);
-                                    // setContCursor({ x: e.offsetX, y: e.offsetY });
-                                    // controlMouseDown(e);
-                                }}
-                                onMouseMove={(e) => {
-                                    // rotateBox(e);
+                                onMouseDown={() => {
+                                    // setControl(true);
+                                    // setIsPointer(true); 임시 주석처리...삭제 ㄴ
+                                    //1. 회전모드를 활성화시킨다.
+                                    setRotate(true);
+
+
                                 }}
                                 onMouseUp={(e) => {
                                     setMouseDown(false);
-                                    // setIsPointer(false)
+                                    //4. 마우스를 떼면 회전모드 종료. 
+                                    setRotate(false);
                                 }}
                             />
-                        </>
-                        {/* } */}
+                        </div>
+                        <img
+                            alt="err"
+                            draggable={false}
+                            src={file}
+                            tabIndex={-1}
+                            onClick={() => { setControl(true) }}
+                            onMouseDown={(e) => {
+                                setCursor({ x: e.offsetX, y: e.offsetY });
+                                setMouseDown(true);
+                            }}
+                            onMouseUp={() => {
+                                setMouseDown(false);
+                                setControl(true);
+                            }}
+                            onPointerEnter={(e): void => setIsPointer(true)}
+                            onPointerLeave={(e): void => setIsPointer(false)}
+                            onBlur={(e): void => { if (!isPointer) setControl(false); }}
+                        />
                     </div>
-                    {/* <div class={style.controlTest}>
-                        <div class={[style.controlBtn, style.moveNW].join(" ")}></div>
-                        <div class={[style.controlBtn, style.moveW].join(" ")}></div>
-                    </div> */}
-                    <img id="boxRef"
-                        alt="image not found"
-                        draggable={false}
-                        src={file}
-                        onClick={() => { setControl(true) }}
-                        tabIndex={-1}
-                        onMouseDown={(e) => {
-                            setMouseDown(true);
-                            // setCursor({ x: e.offsetX, y: e.offsetY });
-                        }}
-                        onMouseUp={() => {
-                            setMouseDown(false);
-                            setControl(true);
-                        }}
-                        onPointerEnter={(e): void => setIsPointer(true)}
-                        onPointerLeave={(e): void => setIsPointer(false)}
-                        onBlur={(e): void => { if (!isPointer) setControl(false); }}
-                    >
-                    </img>
-                </div>
-            </>
-            }
-            <div class={style.canvas} id="canvas">
+                </>
+                }
+                <div class={style.canvas} />
+                <input type="file"
+                    hidden
+                    id="upload"
+                    onInput={(e) => saveFileImg(e)}
+                />
+                <label htmlFor="upload"
+                    class={[style.imageBtn, file && style.active].join(" ")}
+                >이미지</label>
             </div>
-            <input type="file"
-                hidden
-                id="upload"
-                onInput={(e) => saveFileImg(e)}
-            />
-            <label htmlFor="upload"
-                class={[style.imageBtn, file && style.active].join(" ")}
-            >이미지</label>
         </div>
+
     </Fragment>
 };
 
