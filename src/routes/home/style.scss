@@ -71,6 +71,13 @@
 				max-width: 500px;
 				max-height: 250px;
 			}
+
+			> .controlBox {
+				border: 1px solid aliceblue;
+				position: relative;
+				height: 1;
+				width: 1;
+			}
 		}
 
 		.controlBtn {
@@ -93,12 +100,9 @@
 
 			&.moveE {
 				cursor: e-resize;
-				// position: fixed;
 			}
 			&.moveW {
 				cursor: w-resize;
-				top: 50%;
-				background-color: rgb(114, 114, 25);
 			}
 			&.moveS {
 				cursor: s-resize;
