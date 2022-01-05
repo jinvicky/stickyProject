@@ -1,42 +1,7 @@
+@import "./mixin.scss";
+
 .baseLayout {
-	max-width: 1920px;
-	min-width: 1320px;
-	height: 800px;
-	border: 1px solid red;
-	position: relative;
-	background-color: #ddd;
-
-	.canvas {
-		border: 1px solid #aca79f;
-		background-color: #ffffff;
-		width: 966px;
-		height: 65%;
-		position: relative;
-		top: 200px;
-		margin: 0 auto;
-	}
-	.imageBtn {
-		border: 1px solid purple;
-		color: purple;
-		font-weight: bold;
-		font-size: 20px;
-		padding: 15px 20px;
-		border-radius: 10px;
-		position: absolute;
-		top: 90px;
-		left: 45%;
-		cursor: pointer;
-		user-select: none;
-
-		&.active {
-			background-color: purple;
-			color: white;
-		}
-	} // end of .imageBtn
-} // end of .baseLayout
-
-.moveableWrapper {
-	border: 1px solid black;
+	@include baseLayout();
 
 	.moveableBox {
 		border: 1px solid red;
@@ -46,57 +11,77 @@
 		z-index: 5;
 		display: inline-block;
 
+		> .targetLine {
+			position: relative;
+			background-color: turquoise;
+			width: 2px;
+			height: 23px;
+			top: 0px;
+			margin: 0 auto;
+		}
 		> img {
-			display: block; // how to remove white space under an image using css.
+			display: block;
 			width: auto;
 			height: auto;
 			max-width: 500px;
 			max-height: 250px;
 		}
-		> .stick {
-			position: relative;
-			background-color: turquoise;
-			width: 2px;
-			height: 23px;
-			top: -59px;
-			margin: 0 auto;
+	}
+
+	.controlBtn {
+		background-color: rgb(255, 255, 255);
+		border: 2px solid turquoise;
+		border-radius: 50%;
+		width: 15px;
+		height: 15px;
+		position: relative;
+		top: -8px;
+		left: -6px;
+
+		&.rotate {
+			display: block;
+			cursor: ne-resize;
+			background-color: red;
+			z-index: 5;
+			// transform: translate(380px, 350px);
+		}
+
+		&.moveE {
+			cursor: e-resize;
+			// position: fixed;
+		}
+		&.moveW {
+			cursor: w-resize;
+			top: 50%;
+			background-color: rgb(114, 114, 25);
+		}
+		&.moveS {
+			cursor: s-resize;
+		}
+		&.moveN {
+			cursor: n-resize;
+		}
+
+		&.moveNW {
+			cursor: nw-resize;
 		}
 	}
-}
-
-.moveable {
-	background-color: rgb(255, 255, 255);
-	border: 2px solid turquoise;
-	border-radius: 50%;
-	width: 15px;
-	height: 15px;
-	position: absolute;
-	transform: translateZ(0px) translate(70px, 50px) rotate(0rad) scale(1);
-
-	/*
-	동그라미 버튼들 
-	position: fixed에 
-	transform: translate()해서 ()안의 값들이 계속 바뀌는 것임. 
-
-	*/
-
-	&.rotate {
-		cursor: ne-resize;
-		background-color: red;
-		z-index: 5;
-		transform: translate(580px, 350px);
+	.controlTest {
+		border: 1px solid black;
+		position: relative;
+		bottom: 0;
+		height: 50px;
+		z-index: 9;
 	}
 
-	&.moveE {
-		cursor: e-resize;
+	.canvas {
+		@include canvas();
 	}
-	&.moveW {
-		cursor: w-resize;
-	}
-	&.moveS {
-		cursor: s-resize;
-	}
-	&.moveN {
-		cursor: n-resize;
-	}
-}
+	.imageBtn {
+		@include uploadButton();
+
+		&.active {
+			@include uploadButton(true);
+		}
+	} // end of .imageBtn
+} // end of .baseLayout
