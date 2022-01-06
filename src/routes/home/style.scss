@@ -49,7 +49,7 @@
 		} // end of .imageBtn
 
 		.moveableBox {
-			// border: 1px solid red;
+			border: 1px solid red;
 			position: absolute;
 			user-select: none;
 			cursor: move;
@@ -64,19 +64,34 @@
 				top: 0px;
 				margin: 0 auto;
 			}
+
+			> .targetBorder {
+				position: fixed;
+				background-color: turquoise;
+				width: 2px;
+
+				&.N {
+					top: 23px;
+					width: 100%;
+					height: 2px; //rotate의 너비 길이
+					display: flex;
+					justify-content: space-between;
+				}
+				&.S {
+					bottom: 0;
+					width: 100%;
+					height: 2px;
+					display: flex;
+					justify-content: space-between;
+				}
+			}
+
 			> img {
 				display: block;
 				width: auto;
 				height: auto;
 				max-width: 500px;
 				max-height: 250px;
-			}
-
-			> .controlBox {
-				border: 1px solid aliceblue;
-				position: relative;
-				height: 1;
-				width: 1;
 			}
 		}
 
@@ -88,24 +103,26 @@
 			height: 15px;
 			position: relative;
 			top: -8px;
-			left: -6px;
 
 			&.rotate {
 				display: block;
 				cursor: ne-resize;
 				background-color: red;
 				z-index: 5;
-				// transform: translate(380px, 350px);
+				left: -6px;
 			}
 
 			&.moveE {
 				cursor: e-resize;
+				top: 50%;
 			}
 			&.moveW {
 				cursor: w-resize;
 			}
 			&.moveS {
 				cursor: s-resize;
+				margin: 0 auto;
+				left: 0;
 			}
 			&.moveN {
 				cursor: n-resize;
@@ -114,13 +131,15 @@
 			&.moveNW {
 				cursor: nw-resize;
 			}
+
+			&.moveSE {
+				display: inline-block;
+				cursor: se-resize;
+			}
+			&.moveSW {
+				display: inline-block;
+				cursor: sw-resize;
+			}
 		}
-		.controlTest {
-			border: 1px solid black;
-			position: relative;
-			bottom: 0;
-			height: 50px;
-			z-index: 9;
-		}
-	} // end of .baseLayout
+	} // end of .moveSP
 }

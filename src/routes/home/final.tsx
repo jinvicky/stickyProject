@@ -3,15 +3,7 @@ import { useState } from 'preact/hooks';
 import style from './style.scss';
 
 const Home: FunctionalComponent = () => {
-    //drag 기능
 
-    //DESC:: 파일 이미지 저장 상태
-    const [file, setFile] = useState("");
-
-    //DESC:: 파일 선택한 이미지를 저장하는 함수.
-    const saveFileImg = (e: any) => {
-        setFile(URL.createObjectURL(e.target.files[0]));
-    }
     //DESC:: 무블 박스 pos값
     const [boxPos, setBoxPos] = useState({ top: 400, left: 480 });
 
@@ -52,8 +44,8 @@ const Home: FunctionalComponent = () => {
 
             const imageRef = image.getBoundingClientRect();
 
-            let centerX = image?.offsetLeft + (image?.clientWidth / 2); //절반 값은 가져오는 거 같다
-            let centerY = image?.offsetTop + (image?.clientHeight / 2); //width가 한 20 차이나기는 하는데...
+            let centerX = image?.offsetLeft + (image?.clientWidth / 2);
+            let centerY = image?.offsetTop + (image?.clientHeight / 2);
 
             const mouseX = e.clientX - imageRef.left;
             const mouseY = e.clientY - imageRef.top;
@@ -83,40 +75,31 @@ const Home: FunctionalComponent = () => {
                     spaceMouseU();
                 }}
             >
-                {file &&
-                    <div class={style.moveableBox}
-                        style={{
-                            transform: `translate(${boxPos.left}px, ${boxPos.top}px) rotate(${deg}deg)`
-                        }}
-                    >
-                        <div class={style.targetLine}>
-                            <div id="control"
-                                class={[style.controlBtn, style.rotate].join(" ")}
-                                onMouseDown={(e) => spaceMouseD()}
-                                onMouseUp={(e) => spaceMouseU()}
-                            />
-                        </div>
-                        <img
-                            src={file}
-                            id="image"
-                            draggable={false}
-                            tabIndex={-1}
-                            onMouseDown={(e) => {
-                                setCursor({ x: e.offsetX, y: e.offsetY });
-                                setMouseD(true);
-                            }}
-                            onMouseUp={() => setMouseD(false)}
+                <div class={style.moveableBox}
+                    style={{
+                        transform: `translate(${boxPos.left}px, ${boxPos.top}px) rotate(${deg}deg)`
+                    }}
+                >
+                    <div class={style.targetLine}>
+                        <div id="control"
+                            class={[style.controlBtn, style.rotate].join(" ")}
+                            onMouseDown={() => spaceMouseD()}
+                            onMouseUp={() => spaceMouseU()}
                         />
-                    </div>}
+                    </div>
+                    <img
+                        id="image"
+                        draggable={false}
+                        src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                        tabIndex={-1}
+                        onMouseDown={(e) => {
+                            setCursor({ x: e.offsetX, y: e.offsetY });
+                            setMouseD(true);
+                        }}
+                        onMouseUp={() => setMouseD(false)}
+                    />
+                </div>
                 <div class={style.canvas} />
-                <input type="file"
-                    hidden
-                    id="upload"
-                    onInput={(e) => saveFileImg(e)}
-                />
-                <label htmlFor="upload"
-                    class={[style.imageBtn, file && style.active].join(" ")}
-                >이미지</label>
             </div>;
         </div>;
     </Fragment>

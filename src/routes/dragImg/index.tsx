@@ -10,20 +10,19 @@ const Home: FunctionalComponent = () => {
     const saveFileImg = (e: any) => {
         setFile(URL.createObjectURL(e.target.files[0]));
     }
+
     //DESC:: 무블 박스 pos값
     const [boxPos, setBoxPos] = useState({ top: 400, left: 480 });
 
     //DESC:: 이미지 안에서의 mouse pos값 
     const [cursor, setCursor] = useState({ x: 0, y: 0 });
-    // =============================================================
-
 
     //DESC:: mouseDown 여부 체크
     const [mouseD, setMouseD] = useState(false);
 
     //DESC:: 이미지를 이동시키는 함수
     const movePosOfBox = (e: MouseEvent) => {
-        const j = document.getElementById("moveSP"); //.baseLayout
+        const j = document.getElementById("moveSP");
         const jin = j?.getBoundingClientRect();
 
         if (jin !== undefined)
@@ -56,9 +55,9 @@ const Home: FunctionalComponent = () => {
                             />
                         </div>
                         <img
-                            src={file}
                             id="image"
                             draggable={false}
+                            src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                             tabIndex={-1}
                             onMouseDown={(e) => {
                                 setCursor({ x: e.offsetX, y: e.offsetY });
@@ -67,16 +66,7 @@ const Home: FunctionalComponent = () => {
                             onMouseUp={() => setMouseD(false)}
                         />
                     </div>}
-                {/* ---------------------------------------------------------------------------- */}
                 <div class={style.canvas} />
-                <input type="file"
-                    hidden
-                    id="upload"
-                    onInput={(e) => saveFileImg(e)}
-                />
-                <label htmlFor="upload"
-                    class={[style.imageBtn, file && style.active].join(" ")}
-                >이미지</label>
             </div>;
         </div>;
     </Fragment>
