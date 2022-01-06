@@ -3,6 +3,7 @@ import { useState } from 'preact/hooks';
 import style from './style.scss';
 
 const Home: FunctionalComponent = () => {
+    // rotate 기능
 
     //DESC:: 무블 박스 pos값
     const [boxPos, setBoxPos] = useState({ top: 600, left: 480 });
@@ -18,7 +19,6 @@ const Home: FunctionalComponent = () => {
         const j = document.getElementById("moveSP"); //.moveableSpace
         const jin = j?.getBoundingClientRect();
 
-        // if (mouseDown && jin !== undefined)
         if (jin !== undefined)
             setBoxPos({
                 top: e.clientY - cursor.y - jin?.top,
@@ -68,10 +68,7 @@ const Home: FunctionalComponent = () => {
             >
                 <div class={style.moveableBox}
                     style={{
-                        // top: boxPos.top,
-                        // left: boxPos.left,
                         transform: `translate(${boxPos.left}px, ${boxPos.top}px) rotate(${deg}deg)`
-                        // transform: `rotate(${deg}deg)`,
                     }}>
                     <div class={style.targetLine}>
                         <div id="control"
