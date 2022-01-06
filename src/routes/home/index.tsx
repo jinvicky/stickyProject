@@ -5,82 +5,81 @@ import style from './style.scss';
 const Home: FunctionalComponent = () => {
 
     //DESC:: 무블 박스 pos값
-    const [boxPos, setBoxPos] = useState({ top: 400, left: 480 });
+    const [boxPos, setBoxPos] = useState({ top: 600, left: 480 });
 
     //DESC:: 이미지 안에서의 mouse pos값 
     const [cursor, setCursor] = useState({ x: 0, y: 0 });
-    // =============================================================
 
-    // control mousedown 여부 체크 
-    let mousedown = false;
-
-    const [mouPos, setMouPos] = useState({ x: 0, y: 0 });
-
-
+    //DESC:: 회전 시 각도를 저장
     const [deg, setDeg] = useState(0);
 
-    //DESC:: 이미지를 회전시키는 함수
-    const rotateBox = (e: MouseEvent) => {
+    //DESC:: 이미지를 이동시키는 함수
+    const movePosOfBox = (e: MouseEvent) => {
+        const j = document.getElementById("moveSP"); //.moveableSpace
+        const jin = j?.getBoundingClientRect();
 
+        // if (mouseDown && jin !== undefined)
+        if (jin !== undefined)
+            setBoxPos({
+                top: e.clientY - cursor.y - jin?.top,
+                left: e.clientX - cursor.x - jin?.left
+            });
     }
 
-    /**
-     * 
-     * 
-     * 
-     * 
-     */
+    const [rotate, setRotate] = useState(false);
+
+    //DESC:: 공간에서 mouseDown했을 때 발생 함수.
+    const spaceMouseD = () => {
+        setRotate(true);
+    }
+
+    //DESC:: 공간에서 mouseMove할때 발생 함수.
+    const spaceMouseM = (e: MouseEvent) => {
+        const image = document.getElementById("image");
+
+        if (image) {
+
+            const imageRef = image.getBoundingClientRect();
+
+            let centerX = image?.offsetLeft + (image?.clientWidth / 2); //절반 값은 가져오는 거 같다
+            let centerY = image?.offsetTop + (image?.clientHeight / 2); //width가 한 20 차이나기는 하는데...
+
+            const mouseX = e.clientX - imageRef.left;
+            const mouseY = e.clientY - imageRef.top;
+
+            const radians = Math.atan2(mouseY - centerY, mouseX - centerX);
+            const deg = (radians * (180 / Math.PI) * -1) + 90;
+
+            if (rotate) setDeg(-deg - 180);
+        }
+    }
+
+    const spaceMouseU = () => {
+        setRotate(false);
+    }
 
     return <Fragment>
         <div class={style.root}>
             <div class={style.sideBar} />
-            <div class={style.baseLayout}
+            <div class={style.moveableSpace}
                 id="moveSP"
-                onMouseMove={(e) => {
-
-                    console.log("pageX : ", e.pageX);
-                    console.log("pageY : ", e.pageY);
-
-                    setMouPos({ x: e.pageX, y: e.pageY })
-
-
-                    //e.pageX, e.pageY가 내 생각대로 계속 갱신되지 않아서 생기는 이슈.
-                    // if (mousedown) {
-                    const image = document.getElementById("image");
-                    if (image) {
-                        const centerX = image?.offsetTop + (image?.clientWidth / 2); //width가 한 20 차이나기는 하는데...
-                        const centerY = image?.offsetLeft + (image?.clientHeight / 2); //절반 값은 가져오는 거 같다
-                        const mouseX = mouPos.x;
-                        const mouseY = mouPos.y;
-
-                        const radians = Math.atan2(mouseY - centerY, mouseX - centerX);
-                        const res = (radians * (180 / Math.PI) * -1) + 90;
-
-                        setDeg(res);
-                    }
-                    // }
-                }}
-                onMouseUp={() => { mousedown = false }}
+                onMouseMove={(e) => { spaceMouseM(e) }}
+                onMouseUp={(e) => spaceMouseU()}
             >
                 <div class={style.moveableBox}
                     style={{
-                        top: boxPos.top,
-                        left: boxPos.left,
-                        transform: `rotate(${deg}deg)`,
+                        // top: boxPos.top,
+                        // left: boxPos.left,
+                        transform: `translate(${boxPos.left}px, ${boxPos.top}px) rotate(${deg}deg)`
+                        // transform: `rotate(${deg}deg)`,
                     }}>
                     <div class={style.targetLine}>
                         <div id="control"
                             class={[style.controlBtn, style.rotate].join(" ")}
-                            onMouseDown={() => {
-                                mousedown = true;
-
-                            }}
-                            onMouseUp={() => {
-                                mousedown = false;
-                            }}
+                            onMouseDown={(e) => spaceMouseD()}
+                            onMouseUp={(e) => spaceMouseU()}
                         />
                     </div>
-                    {/* w: 446px h: 250px */}
                     <img
                         id="image"
                         draggable={false}
