@@ -43,6 +43,7 @@ const Home: FunctionalComponent = () => {
         setDeg(0);
         setBoxPos({ top: 400, left: 480 });
         setBoxSize({ width: "auto", height: "auto" });
+        // setImgSize({ width: 0, height: 0 }); //not working......
     }, [file]);
 
     //DESC:: 박스를 이동시키는 함수
@@ -77,6 +78,16 @@ const Home: FunctionalComponent = () => {
         }
     }
 
+    //DESC:: 박스 수정 후 변경된 이미지 사이즈를 저장하는 함수 
+    const updateImgSize = () => {
+        const update = document.getElementById("image");
+        if (update) {
+            const updatedWid = update?.getBoundingClientRect().width;
+            const updatedHeight = update?.getBoundingClientRect().height;
+            setImgSize({ width: updatedWid, height: updatedHeight });
+        }
+    }
+
     //DESC:: 공간에서 mouseDown했을 때 발생 함수.
     const spaceMouseD = () => {
         setRotate(true);
@@ -88,23 +99,46 @@ const Home: FunctionalComponent = () => {
         //1. 이미지 박스 회전하기.
         rotateBox(e);
 
-        let diffY = startPos.y - e.clientY;
-        let diffX = startPos.x - e.clientX;
-        // console.log("1. ", imgSize.height);
-        // console.log("2. ", diffY);
-        // console.log("3. ", imgSize.height - diffY);
-        if (resize) {
-            setBoxSize({ width: String(imgSize.width), height: String(imgSize.height - diffY) });
-        }
 
+
+
+        /** 경우의 수 
+         * 1. width만 바뀌는 경우 
+         * 2. height만 바뀌는 경우 
+         * 3. width, height 모두 바뀌는 경우 
+         * 4. width와 boxPos.left가 바뀌는 경우 
+         * 5. height와 boxPos.top이 바뀌는 경우 
+         * 6. width, height, boxPos.left, boxPost.top 모두 바뀌는 경우 
+         * 
+         * 파람이 width, height, both 세 가지 경우로 나뉠 수 있겠고, 
+         * top만 바뀌는 경우가 있고, left만 바뀌는 경우가 있고, 
+         * top과 left 모두 바뀌는 경우(both)가 있음.
+         * 
+         */
+
+
+
+
+        // 
+
+
+
+
+        //일단은 boxPos를 제외하고 w, h, both를 구별해보자. 
+        /**
+         * 
+         * 구별을 어떻게 하지? direction, useReducer를 써야 하는 건가?          
+         */
     }
+
+
     //DESC:: control의 시작점을 정하는 함수.
     const pickStartPos = (e: MouseEvent) => {
         setResize(true);
 
     }
     const spaceMouseU = () => {
-        // setRotate(false);
+        setRotate(false);
         setResize(false);
     }
     //DESC:: control버튼의 onMouseUp
@@ -119,14 +153,21 @@ const Home: FunctionalComponent = () => {
                 id="moveSP"
                 onMouseDown={(e) => {
 
-
-                    console.log("mousedown 발생: ", e.currentTarget);
-                    //control 버튼의 시작점을 설정한다. 
                     setStartPos({ x: e.clientX, y: e.clientY });
                 }}
                 onMouseMove={(e) => {
                     if (mouseD) movePosOfBox(e);
-                    spaceMouseM(e);
+
+                    console.log("d: ", mouseD);
+                    //mouseD의 오류. false인 줄 알았는데 true였다. 
+                    // spaceMouseM(e);
+                    rotateBox(e);
+                    //
+                    let diffY = startPos.y - e.clientY;
+                    let diffX = startPos.x - e.clientX;
+                    if (resize) {
+                        setBoxSize({ width: String(imgSize.width - diffX), height: String(imgSize.height - diffY) });
+                    }
                 }}
                 onMouseUp={() => {
                     setMouseD(false);
@@ -136,7 +177,6 @@ const Home: FunctionalComponent = () => {
                 {file &&
                     <div class={style.moveableBox}
                         style={{
-                            // width를 어떻게 갱신할 지를 모르겠다.
                             width: `${boxSize.width}px`,
                             height: `${boxSize.height}px`,
                             transform: `translate(${boxPos.left}px, ${boxPos.top}px) rotate(${deg}deg)`,
@@ -166,29 +206,61 @@ const Home: FunctionalComponent = () => {
                             border: "1px solid blue",
                             width: "100%",
                             height: "100%",
-                            maxWidth: 500,
+                            maxWidth: 450,
                             maxHeight: 250,
-                        }}>
-                            <div class={[style.testControl, style.e].join(" ")} />
-                            <div class={[style.testControl, style.w].join(" ")} />
+                        }}
+                            onMouseDown={(e) => {
+
+                                console.log("214:: div: ", e.target);
+                                setCursor({ x: e.offsetX, y: e.offsetY });
+                                setMouseD(true);// pb
+                            }}
+                            onMouseUp={() => setMouseD(false)}
+                        //TODO:: 기존에 #image에 걸었던 참조들을 div로 이동할 것.
+                        >
+                            <div class={[style.testControl, style.e].join(" ")}
+                                onMouseDown={(e) => {
+                                    console.log("221:: ", e.target);
+                                    setStartPos({ x: e.clientX, y: e.clientY });
+                                    e.stopPropagation();
+                                    pickStartPos(e);
+                                }}
+                                onMouseUp={(e) => {
+                                    toDownControlMouseU(e)
+                                    updateImgSize();
+                                    //TODO:: 파일이 바뀌면 기본 이미지 사이즈로 바뀌도록.... 해야 함.
+                                }}
+                            />
+                            <div class={[style.testControl, style.w].join(" ")}
+                                onMouseDown={(e) => {
+                                    pickStartPos(e);
+                                }}
+                                onMouseUp={(e) => {
+                                    toDownControlMouseU(e)
+                                    updateImgSize();
+                                }}
+                            />
 
                             <div class={[style.testControl, style.s].join(" ")}
                                 onMouseDown={(e) => {
                                     pickStartPos(e);
-                                    console.log("target Test: ", e.target);
                                 }}
                                 onMouseUp={(e) => {
                                     toDownControlMouseU(e)
-                                    const update = document.getElementById("image");
-                                    if (update) {
-                                        const updatedWid = update?.getBoundingClientRect().width;
-                                        const updatedHeight = update?.getBoundingClientRect().height;
-                                        setImgSize({ width: updatedWid, height: updatedHeight });
-                                    }
-
+                                    updateImgSize();
                                 }}
                             />
                             <div class={[style.testControl, style.n].join(" ")} />
+
+                            <div class={[style.testControl, style.se].join(" ")}
+                                onMouseDown={(e) => {
+                                    pickStartPos(e);
+                                }}
+                                onMouseUp={(e) => {
+                                    toDownControlMouseU(e)
+                                    updateImgSize();
+                                }}
+                            />
 
                             {/* <div class={[style.targetBorder, style.S].join(" ")}>
                                 <div id="control"
@@ -213,11 +285,6 @@ const Home: FunctionalComponent = () => {
                             src={file}
                             // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                             tabIndex={-1}
-                            onMouseDown={(e) => {
-                                setCursor({ x: e.offsetX, y: e.offsetY });
-                                setMouseD(true);
-                            }}
-                            onMouseUp={() => setMouseD(false)}
                             onLoad={(e) => {
                                 setImgSize({ width: e.currentTarget.width, height: e.currentTarget.height });
                             }}
@@ -226,7 +293,7 @@ const Home: FunctionalComponent = () => {
                                 objectFit: "fill",
                                 width: "100%",
                                 height: "100%",
-                                maxWidth: 500,
+                                maxWidth: 450,
                                 maxHeight: 250,
                             }}
                         />
