@@ -2,6 +2,9 @@ import { Fragment, FunctionalComponent, h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import style from './style.scss';
 
+
+let gvResizeDiffY = 0;
+
 const Home: FunctionalComponent = () => {
 
     //DESC:: 파일 이름 저장.
@@ -34,19 +37,23 @@ const Home: FunctionalComponent = () => {
     const [boxSize, setBoxSize] = useState({ width: "auto", height: "auto" });
     const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
 
-
     //DESC:: 테스트 겸 control 버튼의 시작점 저장하기. 
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
     //DESC:: resize 방향을 저장 
     const [direct, setDirect] = useState("");
 
+    //DESC:: resize 크기를 저장 
+    const [resizeDiff, setResizeDiff] = useState({ x: 0, y: 0 });
 
-    useEffect(() => { // 이미지를 바꿨을 경우 기존의 변화들을 초기화 
+    //DESC::  이미지를 바꿨을 경우 기존의 변화들을 초기화함.
+    useEffect(() => {
         setDeg(0);
         setBoxPos({ top: 400, left: 480 });
         setBoxSize({ width: "auto", height: "auto" });
         // setImgSize({ width: 0, height: 0 }); //not working......
+        setResizeDiff({ x: 0, y: 0 });
+        gvResizeDiffY = 0;
     }, [file]);
 
     //DESC:: 박스를 이동시키는 함수
@@ -91,49 +98,30 @@ const Home: FunctionalComponent = () => {
         }
     }
 
-    //DESC:: 공간에서 mouseDown했을 때 발생 함수.
-    const spaceMouseD = () => {
-        setRotate(true);
-
-    }
-
-    /** 경우의 수 
-     * 1. width만 바뀌는 경우 
-     * 2. height만 바뀌는 경우 
-     * 3. width, height 모두 바뀌는 경우 
-     * 4. width와 boxPos.left가 바뀌는 경우 
-     * 5. height와 boxPos.top이 바뀌는 경우 
-     * 6. width, height, boxPos.left, boxPost.top 모두 바뀌는 경우 
-     * 
-     * 파람이 width, height, both 세 가지 경우로 나뉠 수 있겠고, 
-     * top만 바뀌는 경우가 있고, left만 바뀌는 경우가 있고, 
-     * top과 left 모두 바뀌는 경우(both)가 있음.
-     * 
-     */
-    //일단은 boxPos를 제외하고 w, h, both를 구별해보자. 
-    /**
-     * 
-     * 구별을 어떻게 하지? direction, useReducer를 써야 하는 건가?          
-     */
-
-    //DESC:: control의 시작점을 정하는 함수.
-    const pickStartPos = (e: MouseEvent) => {
+    //DESC:: control들을 onMouseDown했을 때 사용하는 함수
+    const controlMouseDown = (e: MouseEvent, direction: string) => {
+        setDirect(direction);
+        setStartPos({ x: e.clientX, y: e.clientY });
+        e.stopPropagation();
         setResize(true);
-
     }
-    const spaceMouseU = () => {
-        setRotate(false);
+
+    //DESC:: control들을 onMouseUp했을 때 사용하는 함수
+    const controlMouseUP = () => {
         setResize(false);
+        updateImgSize();
+        console.log("사이즈 체크 :: ", gvResizeDiffY);
+
+        setResizeDiff({ ...resizeDiff, y: gvResizeDiffY });
+
+
     }
 
-
-    const resizeBox = (e: MouseEvent) => { //이벤트 타입을 어쩔지를 모르겠당.......
-
+    const resizeBox = (e: MouseEvent) => {
         let diffX = startPos.x - e.clientX;
         let diffY = startPos.y - e.clientY;
 
         if (resize) {
-            console.log("chk dir:; ", direct);
             switch (direct) {
                 case 'e':
                     console.log("1. east");
@@ -142,14 +130,58 @@ const Home: FunctionalComponent = () => {
                         height: String(imgSize.height - 0)
                     });
                     break;
+                case 's':
+                    console.log("2. south");
+                    setBoxSize({
+                        width: String(imgSize.width - 0),
+                        height: String(imgSize.height - diffY)
+                    });
+                    break;
                 case 'se':
-                    console.log("1. southeast");
+                    console.log("3. southeast");
                     setBoxSize({
                         width: String(imgSize.width - diffX),
                         height: String(imgSize.height - diffY)
                     });
+                    break;
+                case 'w':
+                    console.log("4. west");
+                    if (-diffX < 0) diffX = 0;
+                    else if (-diffX > 0) {
+                        setBoxSize({
+                            width: String(imgSize.width + diffX > 450 ? 450 : imgSize.width + diffX),
+                            height: String(imgSize.height - 0)
+                        });
+                        setResizeDiff({
+                            ...resizeDiff,
+                            x: -diffX,
+                        });
+                    }
+                    break;
+                case 'n':
+                    console.log("5. north");
+                    if (-diffY < 0) diffY = 0;
+                    else if (-diffY > 0) {
+
+                        gvResizeDiffY = -diffY;
+                        console.log("gvResizeDiffY ::1.", gvResizeDiffY);
+
+                        setBoxSize({
+                            width: String(imgSize.width - 0),
+                            height: String(imgSize.height + diffY),
+                        });
+                        setResizeDiff({
+                            ...resizeDiff,
+                            y: gvResizeDiffY,
+                        });
+
+                        gvResizeDiffY += -diffY;
+
+                        console.log("gvResizeDiffY ::2.", gvResizeDiffY);
+                    }
+                    break;
                 default:
-                    console.log("default... no direction????");
+                    console.log("no direction????");
                     break;
             }
         }
@@ -163,129 +195,75 @@ const Home: FunctionalComponent = () => {
                 onMouseMove={(e) => {
                     if (mouseD) movePosOfBox(e);
                     rotateBox(e);
-                    // 문제임....
                     resizeBox(e);
                 }}
                 onMouseUp={() => {
                     setMouseD(false);
-                    spaceMouseU();
+                    setRotate(false);
+                    setResize(false);
                     updateImgSize();
                 }}
             >
                 {file &&
                     <div class={style.moveableBox}
                         style={{
-                            width: `${boxSize.width}px`,
-                            height: `${boxSize.height}px`,
-                            transform: `translate(${boxPos.left}px, ${boxPos.top}px) rotate(${deg}deg)`,
+                            width: Number(boxSize.width),
+                            height: Number(boxSize.height),
+                            top: boxPos.top,
+                            left: boxPos.left,
+                            transform: `translate(${resizeDiff.x}px, ${resizeDiff.y}px) rotate(${deg}deg)`,
                         }}
                     >
                         <div class={style.targetLine}>
                             <div id="control"
                                 class={style.rotateControl}
-                                onMouseDown={() => spaceMouseD()}
-                                onMouseUp={() => spaceMouseU()}
+                                onMouseDown={() => setRotate(true)}
+                                onMouseUp={() => {
+                                    setRotate(false);
+                                    setResize(false);
+                                }}
                             />
                         </div>
                         < div class={style.boxWrapper}
                             onMouseDown={(e) => {
-                                setCursor({ x: e.offsetX, y: e.offsetY });
+                                //DESC:: 이미지 w,h가 변해도 이미지 안 커서를 제대로 계산하기 위함.
+                                setCursor({ x: e.offsetX + resizeDiff.x, y: e.offsetY + resizeDiff.y });
                                 setMouseD(true);
                             }}
                             onMouseUp={() => setMouseD(false)}
                         >
                             <div class={[style.testControl, style.e].join(" ")}
-                                data-direction="e"
-                                onMouseDown={(e) => {
-                                    setDirect("e"); //resize 방향을 지정.
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={() => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "e")}
+                                onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.nw].join(" ")}
-                                onMouseDown={(e) => {
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={(e) => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "nw")}
+                                onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.w].join(" ")}
-                                onMouseDown={(e) => {
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={(e) => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "w")}
+                                onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.sw].join(" ")}
-                                onMouseDown={(e) => {
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={(e) => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "sw")}
+                                onMouseUp={() => controlMouseUP()}
                             />
-
                             <div class={[style.testControl, style.s].join(" ")}
-                                onMouseDown={(e) => {
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={(e) => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "s")}
+                                onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.n].join(" ")}
-                                onMouseDown={(e) => {
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={() => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "n")}
+                                onClick={(e) => console.log("clied:::", gvResizeDiffY)}
+                                onMouseUp={() => controlMouseUP()}
                             />
-
                             <div class={[style.testControl, style.se].join(" ")}
-                                onMouseDown={(e) => {
-                                    setDirect("se");
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={() => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "se")}
+                                onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.ne].join(" ")}
-                                onMouseDown={(e) => {
-                                    setStartPos({ x: e.clientX, y: e.clientY });
-                                    e.stopPropagation();
-                                    pickStartPos(e);
-                                }}
-                                onMouseUp={(e) => {
-                                    setResize(false);
-                                    updateImgSize();
-                                }}
+                                onMouseDown={(e) => controlMouseDown(e, "ne")}
+                                onMouseUp={() => controlMouseUP()}
                             />
                         </div>
                         <img
