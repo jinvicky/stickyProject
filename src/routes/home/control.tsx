@@ -2,8 +2,7 @@ import { Fragment, FunctionalComponent, h } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import style from './style.scss';
 
-
-let gvResizeDiffY = 0;
+let transObj = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
@@ -40,11 +39,11 @@ const Home: FunctionalComponent = () => {
     //DESC:: 테스트 겸 control 버튼의 시작점 저장하기. 
     const [startPos, setStartPos] = useState({ x: 0, y: 0 });
 
-    //DESC:: resize 방향을 저장 
-    const [direct, setDirect] = useState("");
-
     //DESC:: resize 크기를 저장 
     const [resizeDiff, setResizeDiff] = useState({ x: 0, y: 0 });
+
+    //DESC:: 반전을 위한 scale() 값을 저장
+    const [scale, setScale] = useState({ x: 1, y: 1 });
 
     //DESC::  이미지를 바꿨을 경우 기존의 변화들을 초기화함.
     useEffect(() => {
@@ -52,8 +51,6 @@ const Home: FunctionalComponent = () => {
         setBoxPos({ top: 400, left: 480 });
         setBoxSize({ width: "auto", height: "auto" });
         // setImgSize({ width: 0, height: 0 }); //not working......
-        setResizeDiff({ x: 0, y: 0 });
-        gvResizeDiffY = 0;
     }, [file]);
 
     //DESC:: 박스를 이동시키는 함수
@@ -99,8 +96,7 @@ const Home: FunctionalComponent = () => {
     }
 
     //DESC:: control들을 onMouseDown했을 때 사용하는 함수
-    const controlMouseDown = (e: MouseEvent, direction: string) => {
-        setDirect(direction);
+    const controlMouseDown = (e: MouseEvent) => {
         setStartPos({ x: e.clientX, y: e.clientY });
         e.stopPropagation();
         setResize(true);
@@ -110,78 +106,35 @@ const Home: FunctionalComponent = () => {
     const controlMouseUP = () => {
         setResize(false);
         updateImgSize();
-        console.log("사이즈 체크 :: ", gvResizeDiffY);
-
-        setResizeDiff({ ...resizeDiff, y: gvResizeDiffY });
-
-
     }
 
-    const resizeBox = (e: MouseEvent) => {
+    //DESC:: resizeBox(e)에서 사용하는 setBoxSize의 중복제거 함수
+    const resizeBoxWidHeight = (diffX: number = 0, diffY: number = 0) => {
+        setBoxSize({
+            width: String(imgSize.width - diffX),
+            height: String(imgSize.height - diffY)
+        });
+    }
+
+    //DESC:: testControl의 방향에 따라서 크기를 조절하는 함수 
+    const resizeBox = (e: MouseEvent, direction: string) => {
         let diffX = startPos.x - e.clientX;
         let diffY = startPos.y - e.clientY;
 
         if (resize) {
-            switch (direct) {
+            switch (direction) {
                 case 'e':
-                    console.log("1. east");
-                    setBoxSize({
-                        width: String(imgSize.width - diffX),
-                        height: String(imgSize.height - 0)
-                    });
-                    break;
-                case 's':
-                    console.log("2. south");
-                    setBoxSize({
-                        width: String(imgSize.width - 0),
-                        height: String(imgSize.height - diffY)
-                    });
-                    break;
-                case 'se':
-                    console.log("3. southeast");
-                    setBoxSize({
-                        width: String(imgSize.width - diffX),
-                        height: String(imgSize.height - diffY)
-                    });
+                    resizeBoxWidHeight(diffX);
                     break;
                 case 'w':
-                    console.log("4. west");
-                    if (-diffX < 0) diffX = 0;
-                    else if (-diffX > 0) {
-                        setBoxSize({
-                            width: String(imgSize.width + diffX > 450 ? 450 : imgSize.width + diffX),
-                            height: String(imgSize.height - 0)
-                        });
-                        setResizeDiff({
-                            ...resizeDiff,
-                            x: -diffX,
-                        });
-                    }
                     break;
-                case 'n':
-                    console.log("5. north");
-                    if (-diffY < 0) diffY = 0;
-                    else if (-diffY > 0) {
-
-                        gvResizeDiffY = -diffY;
-                        console.log("gvResizeDiffY ::1.", gvResizeDiffY);
-
-                        setBoxSize({
-                            width: String(imgSize.width - 0),
-                            height: String(imgSize.height + diffY),
-                        });
-                        setResizeDiff({
-                            ...resizeDiff,
-                            y: gvResizeDiffY,
-                        });
-
-                        gvResizeDiffY += -diffY;
-
-                        console.log("gvResizeDiffY ::2.", gvResizeDiffY);
-                    }
+                case 's':
+                    resizeBoxWidHeight(0, diffY);
+                    break;
+                case 'se':
+                    resizeBoxWidHeight(diffX, diffY);
                     break;
                 default:
-                    console.log("no direction????");
                     break;
             }
         }
@@ -195,7 +148,6 @@ const Home: FunctionalComponent = () => {
                 onMouseMove={(e) => {
                     if (mouseD) movePosOfBox(e);
                     rotateBox(e);
-                    resizeBox(e);
                 }}
                 onMouseUp={() => {
                     setMouseD(false);
@@ -211,7 +163,7 @@ const Home: FunctionalComponent = () => {
                             height: Number(boxSize.height),
                             top: boxPos.top,
                             left: boxPos.left,
-                            transform: `translate(${resizeDiff.x}px, ${resizeDiff.y}px) rotate(${deg}deg)`,
+                            transform: `translate(${transObj.x}px, ${transObj.y}px) rotate(${deg}deg) `,
                         }}
                     >
                         <div class={style.targetLine}>
@@ -233,36 +185,41 @@ const Home: FunctionalComponent = () => {
                             onMouseUp={() => setMouseD(false)}
                         >
                             <div class={[style.testControl, style.e].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "e")}
+                                style={{
+                                    backgroundColor: "violet"
+                                }}
+                                onMouseDown={(e) => controlMouseDown(e)}
+                                onMouseMove={(e) => resizeBox(e, "e")}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.nw].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "nw")}
+                                onMouseDown={(e) => controlMouseDown(e)}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.w].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "w")}
+                                onMouseDown={(e) => controlMouseDown(e)}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.sw].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "sw")}
+                                onMouseDown={(e) => controlMouseDown(e)}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.s].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "s")}
+                                onMouseDown={(e) => controlMouseDown(e)}
+                                onMouseMove={(e) => resizeBox(e, "s")}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.n].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "n")}
-                                onClick={(e) => console.log("clied:::", gvResizeDiffY)}
+                                onMouseDown={(e) => controlMouseDown(e)}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.se].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "se")}
+                                onMouseDown={(e) => controlMouseDown(e)}
+                                onMouseMove={(e) => resizeBox(e, "se")}
                                 onMouseUp={() => controlMouseUP()}
                             />
                             <div class={[style.testControl, style.ne].join(" ")}
-                                onMouseDown={(e) => controlMouseDown(e, "ne")}
+                                onMouseDown={(e) => controlMouseDown(e)}
                                 onMouseUp={() => controlMouseUP()}
                             />
                         </div>
@@ -278,6 +235,9 @@ const Home: FunctionalComponent = () => {
                                     width: e.currentTarget.width,
                                     height: e.currentTarget.height
                                 });
+                            }}
+                            style={{
+                                transform: `scale(${scale.x}, ${scale.y})`
                             }}
                         />
                     </div>
