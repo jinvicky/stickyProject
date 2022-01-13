@@ -1,3 +1,5 @@
+$primary: #4af;
+
 .root {
 	min-width: 1320px;
 	max-width: 1920px;
@@ -49,7 +51,6 @@
 		} // end of .imageBtn
 
 		.moveableBox {
-			border: 1px solid red;
 			position: absolute;
 			user-select: none;
 			cursor: move;
@@ -62,21 +63,23 @@
 			align-items: center;
 
 			> .targetLine {
-				width: 2px;
-				height: 23px;
-				top: -27px;
+				width: 1px;
+				height: 35px;
+				top: -35px;
 				position: absolute;
-				background-color: rgb(8, 180, 163);
+				background-color: $primary;
 
 				> .rotateControl {
 					width: 15px;
 					height: 15px;
-					border: 2px solid turquoise;
+					border: 2px solid $primary;
+
 					border-radius: 50%;
-					position: absolute;
-					top: -5px;
-					left: -6px;
-					background-color: rgb(223, 17, 17);
+					position: relative;
+					left: 50%;
+					top: -10px;
+					transform: translate(-50%, 0);
+					background-color: rgb(184, 27, 100);
 				}
 			}
 			> .boxWrapper {
@@ -86,11 +89,11 @@
 				max-height: 250px;
 				position: fixed;
 				z-index: 90;
-				border: 1px solid blue;
+				border: 1px solid $primary;
 
 				.testControl {
 					background-color: rgb(255, 255, 255);
-					border: 2px solid turquoise;
+					border: 2px solid $primary;
 					border-radius: 50%;
 					width: 15px;
 					height: 15px;
@@ -101,11 +104,11 @@
 						right: 0;
 						top: 50%;
 						transform: translateY(-50%);
-						margin-right: -6px;
+						margin-right: -8px;
 						cursor: e-resize;
 					}
 					&.w {
-						margin-left: -6px;
+						margin-left: -8px;
 						top: 50%;
 						transform: translateY(-50%);
 						cursor: w-resize;
@@ -113,43 +116,43 @@
 					&.nw {
 						top: 0;
 						left: 0;
-						margin-left: -6px;
-						margin-top: -6px;
+						margin-left: -8px;
+						margin-top: -8px;
 						cursor: nw-resize;
 					}
 					&.n {
 						left: 50%;
 						transform: translateX(-50%);
-						margin-top: -6px;
+						margin-top: -8px;
 						cursor: n-resize;
 					}
 					&.ne {
 						right: 0;
 						top: 0;
-						margin-right: -6px;
-						margin-top: -6px;
+						margin-right: -8px;
+						margin-top: -8px;
 						cursor: ne-resize;
 					}
 					&.sw {
 						cursor: sw-resize;
 						left: 0;
 						bottom: 0;
-						margin-left: -6px;
-						margin-bottom: -6px;
+						margin-left: -8px;
+						margin-bottom: -8px;
 					}
 					&.s {
 						bottom: 0;
 						left: 50%;
 						transform: translateX(-50%);
-						margin-bottom: -6px;
+						margin-bottom: -8px;
 						cursor: s-resize;
 					}
 					&.se {
 						cursor: se-resize;
 						right: 0;
 						bottom: 0;
-						margin-right: -6px;
-						margin-bottom: -6px;
+						margin-right: -8px;
+						margin-bottom: -8px;
 					}
 				}
 			}
