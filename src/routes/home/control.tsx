@@ -15,7 +15,7 @@ const Home: FunctionalComponent = () => {
     const saveFileImg = (e: any) => setFile(URL.createObjectURL(e.target.files[0]));
 
     //DESC:: 박스의 위치(position)
-    const [boxPos, setBoxPos] = useState({ top: 0, left: 0 });
+    const [boxPos, setBoxPos] = useState({ top: 400, left: 480 });
 
     //DESC:: 이미지 안에서의 mouse pos값 
     const [cursor, setCursor] = useState({ x: 0, y: 0 });
@@ -54,7 +54,7 @@ const Home: FunctionalComponent = () => {
     //DESC::  이미지를 바꿨을 경우 기존의 변화들을 초기화함.
     useEffect(() => {
         setDeg(0);
-        setBoxPos({ top: 0, left: 0 });
+        setBoxPos({ top: 400, left: 400 });
         setBoxSize({ width: "auto", height: "auto" });
         setCenterOfBox();
     }, [file]);
@@ -72,7 +72,7 @@ const Home: FunctionalComponent = () => {
     }
 
     //DESC:: 박스를 이동시키는 함수
-    const movePosOfBox = (e: MouseEvent) => {
+    const BeforemovePosOfBox = (e: MouseEvent) => {
         const space = document.getElementById("moveSP"); //.moveableSpace
         const spInfo = space?.getBoundingClientRect();
 
@@ -80,11 +80,21 @@ const Home: FunctionalComponent = () => {
             console.log
             setBoxPos({
                 top: e.clientY - cursor.y - spInfo?.top,
-                left: e.clientX - cursor.x - spInfo?.left
+                left: e.clientX - cursor.x - spInfo?.left,
             });
             setCenterOfBox();
         }
     }
+    const movePosOfBox = (e: MouseEvent) => {
+        const canvas = document.getElementById("canvas");
+        if (canvas) {
+            const vas = canvas?.getBoundingClientRect();
+
+            console.log("vas : ", vas.left, vas.top);
+            console.log("client : ", e.clientX, e.clientY);
+        }
+    }
+
     //DESC:: 박스를 회전하는 함수.
     const rotateBox = (e: MouseEvent) => {
         const x = e.clientX - center.x;
@@ -155,135 +165,124 @@ const Home: FunctionalComponent = () => {
             }
         }
     }
-
     return <Fragment>
-        <div class={style.root}
-            id="moveSP"
-            onMouseMove={(e) => {
-                if (mouseD) movePosOfBox(e);
-                rotateBox(e);
-                resizeBox(e); //여기다 걸어야 함...
-            }}
-            onMouseUp={() => {
-                setMouseD(false);
-                setRotate(false);
-                setResize(false);
-                updateImgSize();
-            }}
-
-        >
+        <div class={style.root}>
             <div class={style.moveableSpace}
+                id="moveableSpace"
+                onMouseMove={(e) => {
+                    if (mouseD)
+                        movePosOfBox(e);
+                    rotateBox(e);
+                    resizeBox(e);
+                }}
+                onMouseUp={() => {
+                    setMouseD(false);
+                    setRotate(false);
+                    setResize(false);
+                    updateImgSize();
+                }}
             >
-                {/* {file && */}
-                <div class={style.moveableBox}
-                    style={{
-                        width: Number(boxSize.width),
-                        height: Number(boxSize.height),
-                        top: boxPos.top,
-                        left: boxPos.left,
-                        transform: `translate(${transObj.x}px, ${transObj.y}px) rotate(${deg}deg) `,
-                    }}
+                <div class={style.canvas} id="canvas"
+                    onMouseMove={(e) => console.log("vas 내부 : ", e.offsetX, e.offsetY)}
                 >
-                    <div class={style.targetLine}
+                    {/* <iframe src="https://www.youtube.com/embed/YUs-4jXaLa8"
+                        frameBorder="0"
+                        crossOrigin="anonymous"
+                        style={{
+                            width: "100%",
+                            height: "100%"
+                        }}
+                    /> */}
+                    {/* {file && */}
+
+                    <div class={style.moveableBox}
+                        style={{
+                            width: Number(boxSize.width),
+                            height: Number(boxSize.height),
+                            top: boxPos.top,
+                            left: boxPos.left,
+                            position: "fixed",
+                            transform: `translate(${transObj.x}px, ${transObj.y}px) rotate(${deg}deg) `,
+                        }}
                     >
-                        <div id="control"
-                            class={style.rotateControl}
-                            onMouseDown={() => setRotate(true)}
-                            onMouseMove={(e) => rotateBox(e)}
+                        <div class={style.targetLine}
+                        >
+                            <div id="control"
+                                class={style.rotateControl}
+                                onMouseDown={() => setRotate(true)}
+                                onMouseMove={(e) => rotateBox(e)}
+                                onMouseUp={() => {
+                                    setRotate(false);
+                                    setResize(false);
+                                }}
+                            />
+                        </div>
+                        {/* 
+                        console.log("----->", (e.offsetX * Math.cos(deg * Math.PI / 180) - e.offsetY * Math.sin(deg * Math.PI / 180)));
+                        console.log("----->2", (e.offsetX * Math.sin(deg * Math.PI / 180) + e.offsetY * Math.cos(deg * Math.PI / 180)));
+                        */}
+                        < div class={style.boxWrapper}
+                            onMouseDown={(e) => {
+                                // setCursor({ x: e.offsetX + resizeDiff.x, y: e.offsetY + resizeDiff.y });
+                                setCursor({ x: e.clientX, y: e.clientY });
+                                console.log("커서 체크 : ", cursor);
+                                setMouseD(true);
+
+                            }}
                             onMouseUp={() => {
-                                setRotate(false);
-                                setResize(false);
+                                setMouseD(false)
+                            }}
+                        >
+                            <div class={[style.testControl, style.e].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "e")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.nw].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "nw")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.w].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "w")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.sw].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "sw")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.s].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "s")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.n].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "n")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.se].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "se")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                            <div class={[style.testControl, style.ne].join(" ")}
+                                onMouseDown={(e) => controlMouseDown(e, "ne")}
+                                onMouseUp={() => controlMouseUP()}
+                            />
+                        </div>
+                        <img
+                            class={style.uploadImg}
+                            id="image"
+                            draggable={false}
+                            src={file}
+                            // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                            tabIndex={-1}
+                            onLoad={(e) => {
+                                setImgSize({
+                                    width: e.currentTarget.width,
+                                    height: e.currentTarget.height
+                                });
                             }}
                         />
                     </div>
-                    {/* 
-                        console.log("----->", (e.offsetX * Math.cos(deg * Math.PI / 180) - e.offsetY * Math.sin(deg * Math.PI / 180)));
-                        console.log("----->2", (e.offsetX * Math.sin(deg * Math.PI / 180) + e.offsetY * Math.cos(deg * Math.PI / 180)));
-                        
-                        
-                        
-                        
-                        */}
-                    < div class={style.boxWrapper}
-                        onMouseMove={(e) => {
-                            // console.log("테스트 x,y===", e.clientX, e.clientY)
-                        }}
-                        onMouseDown={(e) => {
-                            // 1번
-                            // console.log("e.client {", e.clientX, e.clientY, "}");
-                            // console.log("e.offset {", e.offsetX, e.offsetY, "}");
-                            // console.log("=========================================");
-                            setCursor({ x: e.offsetX + resizeDiff.x, y: e.offsetY + resizeDiff.y });
-                            // const tes = document.getElementById("image");
-                            // if (tes) {
-                            //     const imgTes = tes?.getBoundingClientRect();
-                            //     console.log("확인차...", imgTes.left);
-                            //     setCursor({
-                            //         x: e.clientX - tes.offsetLeft - e.offsetX,
-                            //         y: e.clientY - tes.offsetTop - e.offsetY,
-                            //     })
-                            //     console.log(cursor, ":: final cursor test");
-                            // }
-
-                            setMouseD(true);
-                        }}
-                        onMouseUp={() => {
-                            setMouseD(false)
-                        }}
-                    >
-                        <div class={[style.testControl, style.e].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "e")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.nw].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "nw")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.w].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "w")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.sw].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "sw")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.s].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "s")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.n].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "n")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.se].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "se")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                        <div class={[style.testControl, style.ne].join(" ")}
-                            onMouseDown={(e) => controlMouseDown(e, "ne")}
-                            onMouseUp={() => controlMouseUP()}
-                        />
-                    </div>
-                    <img
-                        class={style.uploadImg}
-                        id="image"
-                        draggable={false}
-                        src={file}
-                        // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
-                        tabIndex={-1}
-                        onLoad={(e) => {
-                            setImgSize({
-                                width: e.currentTarget.width,
-                                height: e.currentTarget.height
-                            });
-                        }}
-                        style={{
-                            transform: `scale(${scale.x}, ${scale.y})`
-                        }}
-                    />
+                    {/* } */}
                 </div>
-                {/* } */}
-                <div class={style.canvas} />
                 <input type="file"
                     hidden
                     id="upload"
@@ -292,8 +291,8 @@ const Home: FunctionalComponent = () => {
                 <label htmlFor="upload"
                     class={[style.imageBtn, file && style.active].join(" ")}
                 >이미지</label>
-            </div>;
-        </div >;
+            </div>
+        </div >
     </Fragment >
 };
 
