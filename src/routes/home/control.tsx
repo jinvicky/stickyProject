@@ -15,7 +15,7 @@ const Home: FunctionalComponent = () => {
     const saveFileImg = (e: any) => setFile(URL.createObjectURL(e.target.files[0]));
 
     //DESC:: 박스의 위치(position)
-    const [boxPos, setBoxPos] = useState({ top: 400, left: 480 });
+    const [boxPos, setBoxPos] = useState({ top: 0, left: 0 });
 
     //DESC:: 이미지 안에서의 mouse pos값 
     const [cursor, setCursor] = useState({ x: 0, y: 0 });
@@ -48,16 +48,31 @@ const Home: FunctionalComponent = () => {
     //DESC:: 반전을 위한 scale() 값을 저장
     const [scale, setScale] = useState({ x: 1, y: 1 });
 
+    //테스트용 file의 중심점
+    const [center, setCenter] = useState({ x: 0, y: 0 });
+
     //DESC::  이미지를 바꿨을 경우 기존의 변화들을 초기화함.
     useEffect(() => {
         setDeg(0);
-        setBoxPos({ top: 400, left: 480 });
+        setBoxPos({ top: 0, left: 0 });
         setBoxSize({ width: "auto", height: "auto" });
+        setCenterOfBox();
     }, [file]);
+
+    //DESC:: 뷰포트 내에서 함수의 중심점을 잡는 함수 
+    const setCenterOfBox = () => {
+        const target = document.getElementById("image");
+        if (target) {
+            const center = {
+                x: target?.getBoundingClientRect().left + (target?.clientWidth / 2),
+                y: target?.getBoundingClientRect().top + (target?.clientHeight / 2)
+            }
+            setCenter({ x: center.x, y: center.y });
+        }
+    }
 
     //DESC:: 박스를 이동시키는 함수
     const movePosOfBox = (e: MouseEvent) => {
-        // 2번
         const space = document.getElementById("moveSP"); //.moveableSpace
         const spInfo = space?.getBoundingClientRect();
 
@@ -67,38 +82,15 @@ const Home: FunctionalComponent = () => {
                 top: e.clientY - cursor.y - spInfo?.top,
                 left: e.clientX - cursor.x - spInfo?.left
             });
+            setCenterOfBox();
         }
     }
     //DESC:: 박스를 회전하는 함수.
     const rotateBox = (e: MouseEvent) => {
-        const image = document.getElementById("image");
-
-        if (image) {
-
-            const imageRef = image.getBoundingClientRect();
-
-            let centerX = image?.offsetLeft + (image?.clientWidth / 2);
-            let centerY = image?.offsetTop + (image?.clientHeight / 2);
-            //회전 시 바뀌지 않거나 매번 옳게 계산해야 하는데 둘 다 아님ㅋㅋㅋㅋ
-
-            let mouseX = e.clientX - imageRef.left;
-            let mouseY = e.clientY - imageRef.top;
-
-            // console.log("offTst", image?.offsetLeft, image?.offsetTop);
-            // console.log(`client w, h : ${image?.clientWidth}, ${image?.clientHeight}`)
-
-            let radians = Math.atan2(mouseY - centerY, mouseX - centerX);
-
-            radians = Math.atan2(e.clientX - centerX, e.clientY - centerY);
-
-            console.log("tst -------", mouseY, mouseX);
-            //console.log("tst...................", e.clientX, e.clientY);
-            console.log("tset :: ", imageRef.left, imageRef.top);
-            console.log("center:: ", centerX, centerY);
-            const deg = (radians * (180 / Math.PI)) + 90;
-
-            if (rotate) setDeg(deg);
-        }
+        const x = e.clientX - center.x;
+        const y = e.clientY - center.y;
+        const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
+        if (rotate) setDeg(degree);
     }
 
     //DESC:: 박스 수정 후 변경된 이미지 사이즈를 저장하는 함수 
@@ -165,21 +157,22 @@ const Home: FunctionalComponent = () => {
     }
 
     return <Fragment>
-        <div class={style.root}>
-            <div class={style.sideBar} />
+        <div class={style.root}
+            id="moveSP"
+            onMouseMove={(e) => {
+                if (mouseD) movePosOfBox(e);
+                rotateBox(e);
+                resizeBox(e); //여기다 걸어야 함...
+            }}
+            onMouseUp={() => {
+                setMouseD(false);
+                setRotate(false);
+                setResize(false);
+                updateImgSize();
+            }}
+
+        >
             <div class={style.moveableSpace}
-                id="moveSP"
-                onMouseMove={(e) => {
-                    if (mouseD) movePosOfBox(e);
-                    rotateBox(e);
-                    resizeBox(e); //여기다 걸어야 함...
-                }}
-                onMouseUp={() => {
-                    setMouseD(false);
-                    setRotate(false);
-                    setResize(false);
-                    updateImgSize();
-                }}
             >
                 {/* {file && */}
                 <div class={style.moveableBox}
@@ -191,7 +184,8 @@ const Home: FunctionalComponent = () => {
                         transform: `translate(${transObj.x}px, ${transObj.y}px) rotate(${deg}deg) `,
                     }}
                 >
-                    <div class={style.targetLine}>
+                    <div class={style.targetLine}
+                    >
                         <div id="control"
                             class={style.rotateControl}
                             onMouseDown={() => setRotate(true)}
@@ -239,7 +233,6 @@ const Home: FunctionalComponent = () => {
                     >
                         <div class={[style.testControl, style.e].join(" ")}
                             onMouseDown={(e) => controlMouseDown(e, "e")}
-                            // onClick={(e) => console.log("est: ", e.offsetX, e.offsetY)} 
                             onMouseUp={() => controlMouseUP()}
                         />
                         <div class={[style.testControl, style.nw].join(" ")}
