@@ -1,9 +1,7 @@
 import { Fragment, FunctionalComponent, h } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { renderToString } from 'preact-render-to-string';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import style from './style.scss';
-
-
-let transObj = { x: 0, y: 0 };
 
 
 const Home: FunctionalComponent = () => {
@@ -19,9 +17,6 @@ const Home: FunctionalComponent = () => {
 
     //DESC:: 이미지 안에서의 mouse pos값 
     const [cursor, setCursor] = useState({ x: 0, y: 0 });
-
-    //DESC:: mouseDown 여부 체크
-    const [mouseD, setMouseD] = useState(false);
 
     //DESC:: rotate 여부 체크
     const [rotate, setRotate] = useState(false);
@@ -42,12 +37,6 @@ const Home: FunctionalComponent = () => {
     //DESC:: resize 방향을 저장 
     const [direct, setDirect] = useState("");
 
-    //DESC:: resize 크기를 저장 
-    const [resizeDiff, setResizeDiff] = useState({ x: 0, y: 0 });
-
-    //DESC:: 반전을 위한 scale() 값을 저장
-    const [scale, setScale] = useState({ x: 1, y: 1 });
-
     //테스트용 file의 중심점
     const [center, setCenter] = useState({ x: 0, y: 0 });
 
@@ -58,6 +47,8 @@ const Home: FunctionalComponent = () => {
         setBoxSize({ width: "auto", height: "auto" });
         setCenterOfBox();
     }, [file]);
+
+
 
     //DESC:: 뷰포트 내에서 함수의 중심점을 잡는 함수 
     const setCenterOfBox = () => {
@@ -70,7 +61,6 @@ const Home: FunctionalComponent = () => {
             setCenter({ x: center.x, y: center.y });
         }
     }
-
     //DESC:: 박스를 이동시키는 함수
     const BeforemovePosOfBox = (e: MouseEvent) => {
         const space = document.getElementById("moveSP"); //.moveableSpace
@@ -85,15 +75,43 @@ const Home: FunctionalComponent = () => {
             setCenterOfBox();
         }
     }
-    const movePosOfBox = (e: MouseEvent) => {
-        const canvas = document.getElementById("canvas");
-        if (canvas) {
-            const vas = canvas?.getBoundingClientRect();
+    const [prevXY, setPrevXY] = useState({ x: 0, y: 0 });
 
-            console.log("vas : ", vas.left, vas.top);
-            console.log("client : ", e.clientX, e.clientY);
+    const [mouseout, setMouseout] = useState(false);
+
+    const checkMouseOut = useCallback(() => {
+        console.log("mouseout");
+        setMouseout(true);
+    }, []);
+
+    const setPosToCenter = useCallback(() => {
+        console.log("center");
+        setBoxPos({ top: 0, left: 0 });
+        window.removeEventListener("mousemove", movePosOfBox);
+    }, []);
+
+    const movePosOfBox = useCallback((e: MouseEvent) => {
+
+        let newX = prevXY.x - e.clientX;
+        let newY = prevXY.y - e.clientY;
+        const el = document.getElementById("box");
+        if (el) {
+            const rect = el.getBoundingClientRect();
+
+            el.style.left = rect.left - newX + "px";
+            el.style.top = rect.top - newY + "px";
+
+            el.style.left = e.clientX + "px";
+            el.style.top = e.clientY + "px";
+
+            // let deltaX = e.movementX;
+            // let deltaY = e.movementY;
+
         }
-    }
+
+        setCenterOfBox(); // 박스 위치 이동시킨 다음에 중심 다시 잡아주기.
+    }, []);
+
 
     //DESC:: 박스를 회전하는 함수.
     const rotateBox = (e: MouseEvent) => {
@@ -135,7 +153,6 @@ const Home: FunctionalComponent = () => {
         });
     }
 
-
     //DESC:: testControl의 방향에 따라서 크기를 조절하는 함수 
     const resizeBox = (e: MouseEvent) => {
         let diffX = startPos.x - e.clientX;
@@ -151,8 +168,6 @@ const Home: FunctionalComponent = () => {
                         width: String(imgSize.width + diffX),
                         height: String(imgSize.height - 0)
                     });
-                    transObj.x = (imgSize.width - Number(boxSize.width));
-                    console.log("transX:::", transObj.x);
                     break;
                 case 's':
                     resizeBoxWidHeight(0, diffY);
@@ -170,43 +185,27 @@ const Home: FunctionalComponent = () => {
             <div class={style.moveableSpace}
                 id="moveableSpace"
                 onMouseMove={(e) => {
-                    if (mouseD)
-                        movePosOfBox(e);
                     rotateBox(e);
                     resizeBox(e);
                 }}
                 onMouseUp={() => {
-                    setMouseD(false);
                     setRotate(false);
                     setResize(false);
                     updateImgSize();
+                    window.removeEventListener("mousemove", movePosOfBox);
                 }}
             >
-                <div class={style.canvas} id="canvas"
-                    onMouseMove={(e) => console.log("vas 내부 : ", e.offsetX, e.offsetY)}
-                >
-                    {/* <iframe src="https://www.youtube.com/embed/YUs-4jXaLa8"
-                        frameBorder="0"
-                        crossOrigin="anonymous"
-                        style={{
-                            width: "100%",
-                            height: "100%"
-                        }}
-                    /> */}
-                    {/* {file && */}
-
+                <div class={style.canvas} id="canvas">
                     <div class={style.moveableBox}
+                        id="box"
                         style={{
-                            width: Number(boxSize.width),
-                            height: Number(boxSize.height),
                             top: boxPos.top,
                             left: boxPos.left,
-                            position: "fixed",
-                            transform: `translate(${transObj.x}px, ${transObj.y}px) rotate(${deg}deg) `,
+                            position: "absolute",
+                            transform: `translate(${0}px, ${0}px) rotate(${deg}deg) `,
                         }}
                     >
-                        <div class={style.targetLine}
-                        >
+                        <div class={style.targetLine}>
                             <div id="control"
                                 class={style.rotateControl}
                                 onMouseDown={() => setRotate(true)}
@@ -217,20 +216,20 @@ const Home: FunctionalComponent = () => {
                                 }}
                             />
                         </div>
-                        {/* 
-                        console.log("----->", (e.offsetX * Math.cos(deg * Math.PI / 180) - e.offsetY * Math.sin(deg * Math.PI / 180)));
-                        console.log("----->2", (e.offsetX * Math.sin(deg * Math.PI / 180) + e.offsetY * Math.cos(deg * Math.PI / 180)));
-                        */}
                         < div class={style.boxWrapper}
                             onMouseDown={(e) => {
-                                // setCursor({ x: e.offsetX + resizeDiff.x, y: e.offsetY + resizeDiff.y });
-                                setCursor({ x: e.clientX, y: e.clientY });
-                                console.log("커서 체크 : ", cursor);
-                                setMouseD(true);
-
+                                setPrevXY({ x: e.clientX, y: e.clientY });
+                                window.addEventListener("mousemove", movePosOfBox);
+                                window.addEventListener("mouseleave", setPosToCenter);
+                                /**
+                                 * 
+                                 * mouseup을 했는데 mouseout상태라면 박스를 정중앙에 위치시킨다. 
+                                 * 
+                                 */
                             }}
                             onMouseUp={() => {
-                                setMouseD(false)
+                                window.removeEventListener("mousemove", movePosOfBox);
+                                window.removeEventListener("mouseleave", setPosToCenter);
                             }}
                         >
                             <div class={[style.testControl, style.e].join(" ")}
@@ -270,8 +269,8 @@ const Home: FunctionalComponent = () => {
                             class={style.uploadImg}
                             id="image"
                             draggable={false}
-                            src={file}
-                            // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                            // src={file}
+                            src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                             tabIndex={-1}
                             onLoad={(e) => {
                                 setImgSize({
@@ -281,7 +280,6 @@ const Home: FunctionalComponent = () => {
                             }}
                         />
                     </div>
-                    {/* } */}
                 </div>
                 <input type="file"
                     hidden
