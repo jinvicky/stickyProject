@@ -48,55 +48,46 @@ $primary: #4af;
 
 .moveableBox {
 	position: absolute;
-	user-select: none;
-	cursor: move;
-	z-index: 50;
-	display: inline-block;
-	max-height: 250px;
-	max-width: 450px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	user-select: none;
+	cursor: move;
 
 	> .targetLine {
 		width: 1px;
 		height: 35px;
-		top: -35px;
 		position: absolute;
+		top: -35px;
 		background-color: $primary;
 
 		> .rotateControl {
 			width: 15px;
 			height: 15px;
-			border: 2px solid $primary;
-
-			border-radius: 50%;
 			position: relative;
 			left: 50%;
 			top: -10px;
 			transform: translate(-50%, 0);
+			border: 2px solid $primary;
+			border-radius: 50%;
 			background-color: rgb(184, 27, 100);
 		}
 	}
 	> .boxWrapper {
 		width: 100%;
 		height: 100%;
-		max-width: 450px;
-		max-height: 250px;
-		position: fixed;
 		z-index: 90;
 		border: 1px solid $primary;
 
 		.testControl {
-			background-color: rgb(255, 255, 255);
-			border: 2px solid $primary;
-			border-radius: 50%;
 			width: 15px;
 			height: 15px;
 			position: absolute;
+			border: 2px solid $primary;
+			border-radius: 50%;
+			background-color: rgb(255, 255, 255);
 
 			&.e {
-				top: 18px;
 				right: 0;
 				top: 50%;
 				transform: translateY(-50%);
@@ -153,11 +144,8 @@ $primary: #4af;
 		}
 	}
 	> .uploadImg {
-		display: block;
-		object-fit: fill;
 		width: 100%;
 		height: 100%;
-		max-width: 450px;
-		max-height: 250px;
+		position: absolute;
 	}
 }
