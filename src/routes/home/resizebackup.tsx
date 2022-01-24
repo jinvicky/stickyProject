@@ -2,6 +2,7 @@ import { Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './style.scss';
 
+const imgOffset = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
@@ -53,40 +54,55 @@ const Home: FunctionalComponent = () => {
     //드래그 기능.
     const [drag, setDrag] = useState(false);
 
-    // .boxWrapper를 onMouseDown했을 때 실행 함수 
-    const boxMouseDown = (e: MouseEvent) => {
-        setDrag(true)
-        setImgOffset({ x: e.offsetX, y: e.offsetY });
-        setClient({ x: e.clientX, y: e.clientY });
-    };
+    const degToRad = (degree: number) => (deg * Math.PI) / 180;
 
-    const [client, setClient] = useState({ x: 0, y: 0 });
-    const [imgOffset, setImgOffset] = useState({ x: 0, y: 0 });
-    const [vasOffset, setVasOffset] = useState({ x: 0, y: 0 });
+    const boxMouseDown = (e: MouseEvent) => {
+        imgOffset.x = e.offsetX;
+        imgOffset.y = e.offsetY;
+        setDrag(true);
+
+
+
+    };
 
     const movePosOfBox = useCallback((e: MouseEvent) => {
 
-        const space = document.getElementById("moveableSpace");
         const el = document.getElementById("canvas");
-        const box = document.getElementById("box");
-        if (space && el && box) {
+        if (el) {
             const elRect = el.getBoundingClientRect();
-            const boxRect = box.getBoundingClientRect();
 
-            let x = e.clientX - elRect.left;
-            let y = e.clientY - elRect.top;
+            let x = e.clientX - elRect.left - imgOffset.x;
+            let y = e.clientY - elRect.top - imgOffset.y;
 
             setBoxPos({ left: x, top: y });
-
-            console.log("최종: ", x, y);
-
         }
-        setCenterOfBox(); // 박스 위치 이동시킨 다음에 중심 다시 잡아주기.
     }, []);
+
     // .boxWrapper를 onMouseUp했을 때 실행 함수 
     const boxMouseUp = () => {
         setDrag(false);
+        setCenterOfBox();
     }
+
+    // ========================================================================
+    //DESC:: control 버튼들의 direction을 저장한 배열.
+    const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
+
+    //DESC:: controlArray를 map해서 출력.
+    const controlElems = controlArray.map((direction, idx) => {
+        return <div key={idx}
+            class={style.resizeControl}
+            data-id={`${direction}`}
+            onMouseDown={(e) => resizeBox(e, direction)}
+            onMouseUp={() => console.log("control mouse up!")}
+        />;
+    });
+
+    //DESC:: 박스 안 이미지를 resize하는 함수 
+    const resizeBox = (e: MouseEvent, direction: String) => {
+        //방향에 따라서 top, left, width, height를 조정한다. 
+    };
+
     return <Fragment>
         <div class={style.root}>
             <div class={style.moveableSpace}
@@ -101,9 +117,6 @@ const Home: FunctionalComponent = () => {
                 }}
             >
                 <div class={style.canvas} id="canvas"
-                    onMouseDown={(e) => {
-                        setVasOffset({ x: e.offsetX, y: e.offsetY });
-                    }}
                 >
                     <div class={style.moveableBox}
                         id="box"
@@ -124,10 +137,13 @@ const Home: FunctionalComponent = () => {
                             />
                         </div>
                         <div class={style.boxWrapper}
-                            onMouseDown={(e) => boxMouseDown(e)}
+                            id="boxWrapper"
+                            onMouseDown={(e) => {
+                                boxMouseDown(e)
+                            }}
                             onMouseUp={() => boxMouseUp()}
                         >
-                            {/* controls */}
+                            {controlElems}
                         </div>
                         <img
                             class={style.uploadImg}
