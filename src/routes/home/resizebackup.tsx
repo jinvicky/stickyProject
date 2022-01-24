@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './style.scss';
 
 const imgOffset = { x: 0, y: 0 };
+const getElemLeftTop = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
@@ -31,13 +32,14 @@ const Home: FunctionalComponent = () => {
 
     //DESC:: 뷰포트 내에서 함수의 중심점을 잡는 함수
     const setCenterOfBox = () => {
-        const target = document.getElementById("image");
-        if (target) {
+        const point = document.getElementById("centerPoint");
+        if (point) {
+
             const center = {
-                x: target?.getBoundingClientRect().left + (target?.clientWidth / 2),
-                y: target?.getBoundingClientRect().top + (target?.clientHeight / 2)
-            }
-            setCenter({ x: center.x, y: center.y });
+                x: point?.getBoundingClientRect().left + point?.getBoundingClientRect().width,
+                y: point?.getBoundingClientRect().top + point?.getBoundingClientRect().height,
+            };
+            setCenter(center);
         }
     }
     //DESC:: 박스를 회전하는 함수.
@@ -136,6 +138,10 @@ const Home: FunctionalComponent = () => {
                                 onMouseUp={() => setRotate(false)}
                             />
                         </div>
+                        <div
+                            id="centerPoint"
+                            class={style.centerPoint}
+                        />
                         <div class={style.boxWrapper}
                             id="boxWrapper"
                             onMouseDown={(e) => {
@@ -149,8 +155,8 @@ const Home: FunctionalComponent = () => {
                             class={style.uploadImg}
                             id="image"
                             draggable={false}
-                            // src={file}
-                            src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                            src={file}
+                            // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                             tabIndex={-1}
                             onLoad={(e) => { }}
                         />
