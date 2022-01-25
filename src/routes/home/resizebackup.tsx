@@ -2,8 +2,10 @@ import { Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './style.scss';
 
-const imgOffset = { x: 0, y: 0 };
-const getElemLeftTop = { x: 0, y: 0 };
+let imgOffset = { x: 0, y: 0 };
+let imgRect = { x: 0, y: 0 };
+
+let rectDiff = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
@@ -30,11 +32,10 @@ const Home: FunctionalComponent = () => {
         setCenterOfBox();
     }, [file]);
 
-    //DESC:: 뷰포트 내에서 함수의 중심점을 잡는 함수
+    //DESC:: 이미지의 중심점으로 중심을 잡는 함수
     const setCenterOfBox = () => {
         const point = document.getElementById("centerPoint");
         if (point) {
-
             const center = {
                 x: point?.getBoundingClientRect().left + point?.getBoundingClientRect().width,
                 y: point?.getBoundingClientRect().top + point?.getBoundingClientRect().height,
@@ -47,8 +48,34 @@ const Home: FunctionalComponent = () => {
         const x = e.clientX - center.x;
         const y = e.clientY - center.y;
         const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
-        if (rotate) setDeg(degree);
+        if (rotate) {
+            setDeg(degree);
+        }
+        //테스트 
+        const img = document.getElementById("image");
+        if (img) {
+            const rect = img?.getBoundingClientRect();
+            const test = {
+                x: Math.round(rect.width - imgRect.x),
+                y: Math.round(rect.height - imgRect.y)
+            };
+            // console.log("rect diff : ", test);
+            // console.log(Math.round(rect.width), Math.round(rect.height));
+
+            rectDiff = test;
+        }
+
     }
+
+    useEffect(() => {
+        const img = document.getElementById("image");
+        if (img) {
+            const rect = img?.getBoundingClientRect();
+            imgRect.x = rect.width;
+            imgRect.y = rect.height;
+        }
+    }, []);
+
 
     //----------------------------------------------------------------------
     //DESC:: 박스의 위치(position)
@@ -58,15 +85,34 @@ const Home: FunctionalComponent = () => {
 
     const degToRad = (degree: number) => (deg * Math.PI) / 180;
 
+    //DESC:: .boxWrapper를 mousedown할 때 실행하는 함수. 
     const boxMouseDown = (e: MouseEvent) => {
-        imgOffset.x = e.offsetX;
-        imgOffset.y = e.offsetY;
         setDrag(true);
-
-
-
+        setImgOffset(e);
     };
 
+    //DESC:: 이미지의 offset을 지정하는 함수 
+    const setImgOffset = (e: any) => {
+        imgOffset.x = e.layerX;
+        imgOffset.y = e.layerY;
+
+        console.log("오프셋", e)
+        //오직 여기만 수정한다. 
+
+        // const img = document.getElementById("image");
+        // if (img) {
+        //     const rect = img?.getBoundingClientRect();
+        //     console.log(rectDiff.x, rectDiff.y, "-0---------------")
+        //     const newX = e.clientX - rect.left - rectDiff.x;
+        //     const newY = e.clientY - rect.top - rectDiff.y;
+
+        //     imgOffset.x = newX;
+        //     imgOffset.y = newY;
+
+        // }
+    }
+
+    //DESC:: #moveableSpace에서 onMouseMove시 실행하는 함수.
     const movePosOfBox = useCallback((e: MouseEvent) => {
 
         const el = document.getElementById("canvas");
@@ -75,6 +121,7 @@ const Home: FunctionalComponent = () => {
 
             let x = e.clientX - elRect.left - imgOffset.x;
             let y = e.clientY - elRect.top - imgOffset.y;
+
 
             setBoxPos({ left: x, top: y });
         }
@@ -125,7 +172,7 @@ const Home: FunctionalComponent = () => {
                         style={{
                             left: boxPos.left,
                             top: boxPos.top,
-                            width: 300,
+                            width: 700,
                             height: 200,
                             transform: `rotate(${deg}deg)`,
                         }}
@@ -134,7 +181,6 @@ const Home: FunctionalComponent = () => {
                             <div id="control"
                                 class={style.rotateControl}
                                 onMouseDown={() => setRotate(true)}
-                                onMouseMove={(e) => rotateBox(e)}
                                 onMouseUp={() => setRotate(false)}
                             />
                         </div>
@@ -145,9 +191,11 @@ const Home: FunctionalComponent = () => {
                         <div class={style.boxWrapper}
                             id="boxWrapper"
                             onMouseDown={(e) => {
-                                boxMouseDown(e)
+                                boxMouseDown(e);
                             }}
-                            onMouseUp={() => boxMouseUp()}
+                            onMouseUp={() => {
+                                boxMouseUp();
+                            }}
                         >
                             {controlElems}
                         </div>
@@ -155,10 +203,9 @@ const Home: FunctionalComponent = () => {
                             class={style.uploadImg}
                             id="image"
                             draggable={false}
-                            src={file}
-                            // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                            // src={file}
+                            src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                             tabIndex={-1}
-                            onLoad={(e) => { }}
                         />
                     </div>
                 </div>
