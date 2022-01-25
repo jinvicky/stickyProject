@@ -96,20 +96,21 @@ const Home: FunctionalComponent = () => {
         imgOffset.x = e.layerX;
         imgOffset.y = e.layerY;
 
-        console.log("오프셋", e)
-        //오직 여기만 수정한다. 
+        console.log("degree: ", deg);
 
-        // const img = document.getElementById("image");
-        // if (img) {
-        //     const rect = img?.getBoundingClientRect();
-        //     console.log(rectDiff.x, rectDiff.y, "-0---------------")
-        //     const newX = e.clientX - rect.left - rectDiff.x;
-        //     const newY = e.clientY - rect.top - rectDiff.y;
+        const rad = degToRad(deg);
 
-        //     imgOffset.x = newX;
-        //     imgOffset.y = newY;
+        let newX = 100 * Math.sin(rad) + 100 * Math.cos(rad);
+        let newY = 100 * Math.cos(rad) - 100 * Math.sin(rad);
 
-        // }
+        console.log("layer", e.layerX, e.layerY);
+        // console.log("compare: ", newX - 350, newY - 100);
+
+
+        console.log(newX, newY);
+
+
+        // console.log("offset", e.offsetX, e.offsetY);
     }
 
     //DESC:: #moveableSpace에서 onMouseMove시 실행하는 함수.
@@ -172,7 +173,7 @@ const Home: FunctionalComponent = () => {
                         style={{
                             left: boxPos.left,
                             top: boxPos.top,
-                            width: 700,
+                            width: 200,
                             height: 200,
                             transform: `rotate(${deg}deg)`,
                         }}
