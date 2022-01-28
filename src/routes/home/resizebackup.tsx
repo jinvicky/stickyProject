@@ -5,7 +5,8 @@ import style from './style.scss';
 let imgOffset = { x: 0, y: 0 };
 let imgRect = { x: 0, y: 0 };
 
-let rectDiff = { x: 0, y: 0 };
+//DESC:: rotate할 때 변하는 img width, height 고려. 
+let imgSize = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
@@ -43,29 +44,6 @@ const Home: FunctionalComponent = () => {
             setCenter(center);
         }
     }
-    //DESC:: 박스를 회전하는 함수.
-    const rotateBox = (e: MouseEvent) => {
-        const x = e.clientX - center.x;
-        const y = e.clientY - center.y;
-        const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
-        if (rotate) {
-            setDeg(degree);
-        }
-        //테스트 
-        const img = document.getElementById("image");
-        if (img) {
-            const rect = img?.getBoundingClientRect();
-            const test = {
-                x: Math.round(rect.width - imgRect.x),
-                y: Math.round(rect.height - imgRect.y)
-            };
-            // console.log("rect diff : ", test);
-            // console.log(Math.round(rect.width), Math.round(rect.height));
-
-            rectDiff = test;
-        }
-
-    }
 
     useEffect(() => {
         const img = document.getElementById("image");
@@ -76,41 +54,46 @@ const Home: FunctionalComponent = () => {
         }
     }, []);
 
-
     //----------------------------------------------------------------------
     //DESC:: 박스의 위치(position)
     const [boxPos, setBoxPos] = useState({ top: 200, left: 280 });
     //드래그 기능.
     const [drag, setDrag] = useState(false);
 
-    const degToRad = (degree: number) => (deg * Math.PI) / 180;
+    const degToRad = (degree: number) => (degree * Math.PI) / 180;
 
+    //DESC:: 박스를 회전하는 함수.
+    const rotateBox = (e: MouseEvent) => {
+        const x = e.clientX - center.x;
+        const y = e.clientY - center.y;
+        const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
+        if (rotate) {
+            setDeg(Math.round(degree));
+
+        }
+        const i = document.getElementById("image");
+        if (i) {
+            const img = i?.getBoundingClientRect();
+            imgSize.x = img.width;
+            imgSize.y = img.height;
+        }
+    }
     //DESC:: .boxWrapper를 mousedown할 때 실행하는 함수. 
-    const boxMouseDown = (e: MouseEvent) => {
+    const boxMouseDown = (e: any) => {
         setDrag(true);
         setImgOffset(e);
+
     };
 
     //DESC:: 이미지의 offset을 지정하는 함수 
-    const setImgOffset = (e: any) => {
-        imgOffset.x = e.layerX;
-        imgOffset.y = e.layerY;
+    const setImgOffset = (e: MouseEvent) => {
 
-        console.log("degree: ", deg);
-
-        const rad = degToRad(deg);
-
-        let newX = 100 * Math.sin(rad) + 100 * Math.cos(rad);
-        let newY = 100 * Math.cos(rad) - 100 * Math.sin(rad);
-
-        console.log("layer", e.layerX, e.layerY);
-        // console.log("compare: ", newX - 350, newY - 100);
-
-
-        console.log(newX, newY);
-
-
-        // console.log("offset", e.offsetX, e.offsetY);
+        const i = document.getElementById("test");
+        if (i) {
+            const img = i?.getBoundingClientRect();
+            imgOffset.x = Math.round(e.clientX - img.left);
+            imgOffset.y = Math.round(e.clientY - img.top);
+        }
     }
 
     //DESC:: #moveableSpace에서 onMouseMove시 실행하는 함수.
@@ -122,8 +105,6 @@ const Home: FunctionalComponent = () => {
 
             let x = e.clientX - elRect.left - imgOffset.x;
             let y = e.clientY - elRect.top - imgOffset.y;
-
-
             setBoxPos({ left: x, top: y });
         }
     }, []);
@@ -144,7 +125,7 @@ const Home: FunctionalComponent = () => {
             class={style.resizeControl}
             data-id={`${direction}`}
             onMouseDown={(e) => resizeBox(e, direction)}
-            onMouseUp={() => console.log("control mouse up!")}
+        // onMouseUp={() => console.log("control mouse up!")}
         />;
     });
 
@@ -168,12 +149,23 @@ const Home: FunctionalComponent = () => {
             >
                 <div class={style.canvas} id="canvas"
                 >
+                    <div
+                        id="test"
+                        style={{
+                            width: 600,
+                            height: 200,
+                            left: boxPos.left,
+                            top: boxPos.top,
+                            position: "absolute",
+                            // border: "1px solid #ccc",
+                        }}
+                    ></div>
                     <div class={style.moveableBox}
                         id="box"
                         style={{
                             left: boxPos.left,
                             top: boxPos.top,
-                            width: 200,
+                            width: 600,
                             height: 200,
                             transform: `rotate(${deg}deg)`,
                         }}
@@ -188,6 +180,9 @@ const Home: FunctionalComponent = () => {
                         <div
                             id="centerPoint"
                             class={style.centerPoint}
+                            style={{
+                                visibility: "hidden"
+                            }}
                         />
                         <div class={style.boxWrapper}
                             id="boxWrapper"
