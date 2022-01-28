@@ -127,7 +127,6 @@ const Home: FunctionalComponent = () => {
                 setPrev({ x: e.clientX, y: e.clientY });
                 setDir(direction);
             }}
-        // onMouseUp={() => console.log("control mouse up!")}
         />;
     });
 
@@ -228,10 +227,6 @@ const Home: FunctionalComponent = () => {
                                 // src={file}
                                 // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                                 tabIndex={-1}
-                            // style={{
-                            //     width: 600,
-                            //     height: 200,
-                            // }}
                             />
                         </div>
                     </div>
