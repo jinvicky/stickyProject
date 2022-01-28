@@ -8,6 +8,9 @@ let imgRect = { x: 0, y: 0 };
 //DESC:: rotate할 때 변하는 img width, height 고려. 
 let imgSize = { x: 0, y: 0 };
 
+
+let imgWidth = 600;
+
 const Home: FunctionalComponent = () => {
 
     //DESC:: 파일 이름 저장.
@@ -60,34 +63,23 @@ const Home: FunctionalComponent = () => {
     //드래그 기능.
     const [drag, setDrag] = useState(false);
 
-    const degToRad = (degree: number) => (degree * Math.PI) / 180;
-
     //DESC:: 박스를 회전하는 함수.
     const rotateBox = (e: MouseEvent) => {
         const x = e.clientX - center.x;
         const y = e.clientY - center.y;
         const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
-        if (rotate) {
-            setDeg(Math.round(degree));
-
-        }
-        const i = document.getElementById("image");
-        if (i) {
-            const img = i?.getBoundingClientRect();
-            imgSize.x = img.width;
-            imgSize.y = img.height;
-        }
+        if (rotate) setDeg(Math.round(degree));
     }
     //DESC:: .boxWrapper를 mousedown할 때 실행하는 함수. 
     const boxMouseDown = (e: any) => {
         setDrag(true);
         setImgOffset(e);
+        console.log("드래그 활성화 ")
 
     };
 
     //DESC:: 이미지의 offset을 지정하는 함수 
     const setImgOffset = (e: MouseEvent) => {
-
         const i = document.getElementById("test");
         if (i) {
             const img = i?.getBoundingClientRect();
@@ -102,7 +94,6 @@ const Home: FunctionalComponent = () => {
         const el = document.getElementById("canvas");
         if (el) {
             const elRect = el.getBoundingClientRect();
-
             let x = e.clientX - elRect.left - imgOffset.x;
             let y = e.clientY - elRect.top - imgOffset.y;
             setBoxPos({ left: x, top: y });
@@ -119,19 +110,41 @@ const Home: FunctionalComponent = () => {
     //DESC:: control 버튼들의 direction을 저장한 배열.
     const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
 
+
+    //DESC:: control mousedown시 시작하는 e.clientX,Y 저장
+    const [prev, setPrev] = useState({ x: 0, y: 0 });
+    const [dir, setDir] = useState("");
+    const [resize, setResize] = useState(false);
+
     //DESC:: controlArray를 map해서 출력.
     const controlElems = controlArray.map((direction, idx) => {
         return <div key={idx}
             class={style.resizeControl}
             data-id={`${direction}`}
-            onMouseDown={(e) => resizeBox(e, direction)}
+            onMouseDown={(e) => {
+                console.log("축소 활성화")
+                setResize(true);
+                setPrev({ x: e.clientX, y: e.clientY });
+                setDir(direction);
+            }}
         // onMouseUp={() => console.log("control mouse up!")}
         />;
     });
 
     //DESC:: 박스 안 이미지를 resize하는 함수 
     const resizeBox = (e: MouseEvent, direction: String) => {
-        //방향에 따라서 top, left, width, height를 조정한다. 
+        if (resize) {
+
+            if (direction === "e") {
+                const b = document.getElementById("backimage");
+                if (b) {
+                    imgWidth = 600 - (prev.x - e.clientX);
+                }
+
+            } else { //direction is west 
+
+            }
+        }
     };
 
     return <Fragment>
@@ -141,10 +154,12 @@ const Home: FunctionalComponent = () => {
                 onMouseMove={(e) => {
                     if (drag) movePosOfBox(e);
                     rotateBox(e);
+                    resizeBox(e, dir);
                 }}
                 onMouseUp={() => {
                     setRotate(false);
                     setDrag(false);
+                    setResize(false);
                 }}
             >
                 <div class={style.canvas} id="canvas"
@@ -152,12 +167,14 @@ const Home: FunctionalComponent = () => {
                     <div
                         id="test"
                         style={{
-                            width: 600,
-                            height: 200,
+                            position: "absolute",
                             left: boxPos.left,
                             top: boxPos.top,
-                            position: "absolute",
-                            // border: "1px solid #ccc",
+                            width: imgWidth,
+                            maxWidth: 600,
+                            height: 200,
+                            border: "1px solid #ccc",
+                            transform: `translate(${0}, 0)`,
                         }}
                     ></div>
                     <div class={style.moveableBox}
@@ -165,9 +182,10 @@ const Home: FunctionalComponent = () => {
                         style={{
                             left: boxPos.left,
                             top: boxPos.top,
-                            width: 600,
+                            width: imgWidth,
+                            maxWidth: 600,
                             height: 200,
-                            transform: `rotate(${deg}deg)`,
+                            transform: `translate(${0}, 0) rotate(${deg}deg)`,
                         }}
                     >
                         <div class={style.targetLine}>
@@ -180,12 +198,21 @@ const Home: FunctionalComponent = () => {
                         <div
                             id="centerPoint"
                             class={style.centerPoint}
-                            style={{
-                                visibility: "hidden"
-                            }}
                         />
-                        <div class={style.boxWrapper}
+                        <div
                             id="boxWrapper"
+                            class={style.boxWrapper}
+                        >
+                            {controlElems}
+                        </div>
+                        <div
+                            id="backimage"
+                            style={{
+                                backgroundColor: "#ccc",
+                                width: imgWidth,
+                                height: 200,
+                                maxWidth: 600,
+                            }}
                             onMouseDown={(e) => {
                                 boxMouseDown(e);
                             }}
@@ -193,16 +220,20 @@ const Home: FunctionalComponent = () => {
                                 boxMouseUp();
                             }}
                         >
-                            {controlElems}
+
+                            <img
+                                class={style.uploadImg}
+                                // id="image"
+                                draggable={false}
+                                // src={file}
+                                // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                                tabIndex={-1}
+                            // style={{
+                            //     width: 600,
+                            //     height: 200,
+                            // }}
+                            />
                         </div>
-                        <img
-                            class={style.uploadImg}
-                            id="image"
-                            draggable={false}
-                            // src={file}
-                            src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
-                            tabIndex={-1}
-                        />
                     </div>
                 </div>
                 <input type="file"
