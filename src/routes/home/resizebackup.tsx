@@ -121,6 +121,7 @@ const Home: FunctionalComponent = () => {
         return <div key={idx}
             class={style.resizeControl}
             data-id={`${direction}`}
+            data-direction={deg}
             onMouseDown={(e) => {
                 console.log("축소 활성화")
                 setResize(true);
@@ -175,7 +176,7 @@ const Home: FunctionalComponent = () => {
                             border: "1px solid #ccc",
                             transform: `translate(${0}, 0)`,
                         }}
-                    ></div>
+                    />
                     <div class={style.moveableBox}
                         id="box"
                         style={{
