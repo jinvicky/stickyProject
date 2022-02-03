@@ -6,7 +6,6 @@ $primary: #4af;
 	height: 1500px;
 	position: relative;
 	background-color: #ddd;
-	border: 1px solid rgb(69, 145, 25);
 
 	.moveableSpace {
 		width: 100%;
@@ -25,6 +24,10 @@ $primary: #4af;
 			border: 1px solid #aca79f;
 			background-color: #135581;
 		}
+		.cursorHelper {
+			position: absolute;
+			border: 1px solid #ccc;
+		}
 		.imageBtn {
 			padding: 15px 20px;
 			position: absolute;
@@ -42,119 +45,124 @@ $primary: #4af;
 				background-color: purple;
 				color: white;
 			}
-		} // end of .imageBtn
-	} // end of .moveSP
-}
-
-.moveableBox {
-	position: absolute;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	user-select: none;
-	cursor: move;
-
-	> .targetLine {
-		width: 1px;
-		height: 35px;
-		position: absolute;
-		top: -35px;
-		background-color: $primary;
-
-		> .rotateControl {
-			width: 15px;
-			height: 15px;
-			position: relative;
-			left: 50%;
-			top: -10px;
-			transform: translate(-50%, 0);
-			border: 2px solid $primary;
-			border-radius: 50%;
-			background-color: rgb(184, 27, 100);
 		}
-	}
-	> .centerPoint {
-		width: 10px;
-		height: 10px;
-		position: absolute;
-		left: calc(50% - 5px);
-		top: calc(50% - 5px);
-		border: 1px solid white;
-		border-radius: 50%;
-		background-color: red;
-		visibility: hidden;
-	}
-	> .boxWrapper {
-		// width: 100%;
-		// height: 100%;
-		z-index: 90;
-		// border: 1px solid $primary;
 
-		.resizeControl {
-			width: 15px;
-			height: 15px;
+		.moveableBox {
 			position: absolute;
-			border: 2px solid $primary;
-			border-radius: 50%;
-			background-color: rgb(255, 255, 255);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			user-select: none;
+			cursor: move;
+			border: 1px solid $primary;
+
+			> .targetLine {
+				width: 1px;
+				height: 35px;
+				position: absolute;
+				top: -35px;
+				background-color: $primary;
+
+				> .rotateControl {
+					width: 15px;
+					height: 15px;
+					position: relative;
+					left: 50%;
+					top: -10px;
+					transform: translate(-50%, 0);
+					border: 2px solid $primary;
+					border-radius: 50%;
+					background-color: rgb(184, 27, 100);
+				}
+			}
+			> .centerPoint {
+				width: 10px;
+				height: 10px;
+				position: absolute;
+				left: calc(50% - 5px);
+				top: calc(50% - 5px);
+				border: 1px solid white;
+				border-radius: 50%;
+				background-color: red;
+				visibility: hidden;
+			}
+			> .controlBox {
+				z-index: 90;
+
+				.resizeControl {
+					width: 15px;
+					height: 15px;
+					position: absolute;
+					border: 2px solid $primary;
+					border-radius: 50%;
+					background-color: rgb(255, 255, 255);
+				}
+				.resizeControl[data-id="e"] {
+					right: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					margin-right: -8px;
+					cursor: e-resize;
+				}
+				.resizeControl[data-id="w"] {
+					margin-left: -8px;
+					top: 50%;
+					left: 0;
+					transform: translateY(-50%);
+					cursor: w-resize;
+				}
+				.resizeControl[data-id="nw"] {
+					top: 0;
+					left: 0;
+					margin-left: -8px;
+					margin-top: -8px;
+					cursor: nw-resize;
+				}
+				.resizeControl[data-id="n"] {
+					left: 50%;
+					transform: translateX(-50%);
+					margin-top: -8px;
+					cursor: n-resize;
+				}
+				.resizeControl[data-id="ne"] {
+					right: 0;
+					top: 0;
+					margin-right: -8px;
+					margin-top: -8px;
+					cursor: ne-resize;
+				}
+				.resizeControl[data-id="sw"] {
+					cursor: sw-resize;
+					left: 0;
+					bottom: 0;
+					margin-left: -8px;
+					margin-bottom: -8px;
+				}
+				.resizeControl[data-id="s"] {
+					bottom: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					margin-bottom: -8px;
+					cursor: s-resize;
+				}
+				.resizeControl[data-id="se"] {
+					cursor: se-resize;
+					right: 0;
+					bottom: 0;
+					margin-right: -8px;
+					margin-bottom: -8px;
+				}
+			}
 		}
-		.resizeControl[data-id="e"] {
-			right: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			margin-right: -8px;
-			cursor: e-resize;
+		.backImage {
+			width: 100%;
+			height: 100%;
+
+			> .uploadImg {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
 		}
-		.resizeControl[data-id="w"] {
-			margin-left: -8px;
-			top: 50%;
-			left: 0;
-			transform: translateY(-50%);
-			cursor: w-resize;
-		}
-		.resizeControl[data-id="nw"] {
-			top: 0;
-			left: 0;
-			margin-left: -8px;
-			margin-top: -8px;
-			cursor: nw-resize;
-		}
-		.resizeControl[data-id="n"] {
-			left: 50%;
-			transform: translateX(-50%);
-			margin-top: -8px;
-			cursor: n-resize;
-		}
-		.resizeControl[data-id="ne"] {
-			right: 0;
-			top: 0;
-			margin-right: -8px;
-			margin-top: -8px;
-			cursor: ne-resize;
-		}
-		.resizeControl[data-id="sw"] {
-			cursor: sw-resize;
-			left: 0;
-			bottom: 0;
-			margin-left: -8px;
-			margin-bottom: -8px;
-		}
-		.resizeControl[data-id="s"] {
-			bottom: 0;
-			left: 50%;
-			transform: translateX(-50%);
-			margin-bottom: -8px;
-			cursor: s-resize;
-		}
-		.resizeControl[data-id="se"] {
-			cursor: se-resize;
-			right: 0;
-			bottom: 0;
-			margin-right: -8px;
-			margin-bottom: -8px;
-		}
-	}
-	> .uploadImg {
-		display: block;
-	}
+	} // end of .moveSP
 }
