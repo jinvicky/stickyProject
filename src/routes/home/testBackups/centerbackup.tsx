@@ -1,38 +1,27 @@
 import { Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import style from './style.scss';
+import style from './centerbackup.scss';
 
 let imgOffset = { x: 0, y: 0 };
 let imgRect = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
-    //DESC:: 파일 이름 저장.
     const [file, setFile] = useState("");
+    const saveFileImg = (files: FileList) => files && setFile(URL.createObjectURL(files[0]));
 
-    //DESC:: 선택 파일을 저장하는 함수.
-    const saveFileImg = (files: FileList) => {
-        if (files) setFile(URL.createObjectURL(files[0]));
-    };
     // -----------------------------------------------------------------------------------
-    //DESC:: rotate 여부 체크
     const [rotate, setRotate] = useState(false);
-
-    //DESC:: 회전 시 각도를 저장
-    const [deg, setDeg] = useState(0);
-
-    //DESC:: 박스의 중심점을 저장 
+    const [degree, setDegree] = useState(0);
     const [center, setCenter] = useState({ x: 0, y: 0 });
-    // -----------------------------------------------------------------------------------
 
     //DESC:: 이미지를 바꿨을 경우 기존의 변화들을 초기화함.
     useEffect(() => {
-        setDeg(0);
-        setBoxPos({ top: 200, left: 280 });
+        setDegree(0);
+        setBoxPos({ top: 100, left: 100 });
         setCenterOfBox();
     }, [file]);
 
-    //DESC:: 이미지의 중심점으로 중심을 잡는 함수
     const setCenterOfBox = () => {
         const point = document.getElementById("centerPoint");
         if (point) {
@@ -42,7 +31,24 @@ const Home: FunctionalComponent = () => {
             };
             setCenter(center);
         }
-    }
+
+        const b = document.getElementById("moveableBox");
+        if (b) {
+            const rect = b.getBoundingClientRect();
+            const center = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+            };
+            setCenter(center);
+        }
+    };
+
+    const rotateBox = (e: MouseEvent) => {
+        const x = e.clientX - center.x;
+        const y = e.clientY - center.y;
+        const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
+        rotate && setDegree(Math.round(degree));
+    };
 
     useEffect(() => {
         const img = document.getElementById("img");
@@ -53,19 +59,9 @@ const Home: FunctionalComponent = () => {
         }
     }, []);
 
-    //----------------------------------------------------------------------
-    //DESC:: 박스의 위치(position)
-    const [boxPos, setBoxPos] = useState({ top: 200, left: 280 });
-    //드래그 기능.
     const [drag, setDrag] = useState(false);
+    const [boxPos, setBoxPos] = useState({ top: 100, left: 100 });
 
-    //DESC:: 박스를 회전하는 함수.
-    const rotateBox = (e: MouseEvent) => {
-        const x = e.clientX - center.x;
-        const y = e.clientY - center.y;
-        const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
-        if (rotate) setDeg(Math.round(degree));
-    }
     //DESC:: .boxWrapper를 mousedown할 때 실행하는 함수. 
     const boxMouseDown = (e: any) => {
         setDrag(true);
@@ -105,7 +101,6 @@ const Home: FunctionalComponent = () => {
     //DESC:: control 버튼들의 direction을 저장한 배열.
     const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
 
-
     //DESC:: control mousedown시 시작하는 e.clientX,Y 저장
     const [prev, setPrev] = useState({ x: 0, y: 0 });
     const [resize, setResize] = useState({ direction: "one", state: false });
@@ -136,17 +131,114 @@ const Home: FunctionalComponent = () => {
     }
 
     //DESC:: 박스 안 이미지를 resize하는 함수 
-    const resizeBox = (e: MouseEvent) => {
-        if (resize.state) {
-            const b = document.getElementById("moveableBox");
-            const parent = document.getElementById("canvas");
-            if (b && parent) {
+    const resizeBox2 = (e: MouseEvent) => {
+        const b = document.getElementById("moveableBox");
+        const ch = document.getElementById("cursorHelper");
+
+        // rotation matrix test 
+        if (resize.state && resize.direction === "se") {
+            if (b && ch) {
                 b.style.width = b.offsetWidth - (prev.x - e.clientX) + "px";
+                b.style.height = b.offsetHeight - (prev.y - e.clientY) + "px";
+                ch.style.width = b.offsetWidth - (prev.x - e.clientX) + "px";
+                ch.style.height = b.offsetHeight - (prev.y - e.clientY) + "px";
                 setPrev({ x: e.clientX, y: e.clientY });
+                // --------------------------------------------------------
+
+                const newCenter = {
+                    x: b.offsetLeft + b.offsetWidth / 2,
+                    y: b.offsetTop + b.offsetHeight / 2
+                }
+
+                const rotatedA = rotateMatrix(ch.offsetLeft, ch.offsetTop, newCenter.x, newCenter.y, degree);
+                const originalA = { x: ch.offsetLeft, y: ch.offsetTop };
+                // console.log("before: ", originalA, "after: ", rotatedA);
+
+                const nw = document.getElementById("nw");
+                const vas = document.getElementById("canvas");
+                if (nw && vas) {
+                    const rect = nw.getBoundingClientRect().left;
+
+
+                    console.log("@@--", rotatedA[0], originalA.x);
+                }
             }
+        }
+        setCenterOfBox();
+    };
+
+
+    const resizeBox = (e: MouseEvent) => {
+        const radians = degree * Math.PI / 180;
+        const COS = Math.cos(radians);
+        const SIN = Math.sin(radians);
+
+        const box = document.getElementById("moveableBox");
+        const boxHelper = document.getElementById("cursorHelper");
+
+        let newW, newH, initW, initH, rotatedWDiff, rotatedHDiff;
+        let wDiff = e.clientX - prev.x;
+        let hDiff = e.clientY - prev.y;
+        let newX = 0;
+        let newY = 0;
+
+        if (resize.state && resize.direction === "w") { //left
+            if (box) {
+                initW = box?.offsetWidth;
+                initH = box?.offsetHeight;
+                rotatedWDiff = COS * wDiff + SIN * hDiff;
+                newW = initW - rotatedWDiff;
+                newW = box && box.offsetWidth - (e.clientX - prev.x);
+            }
+
+            rotatedWDiff = COS * wDiff + SIN * hDiff;
+
+            newX += 0.5 * rotatedWDiff * COS;
+            newY += 0.5 * rotatedWDiff * SIN;
+
+            if (box && boxHelper) {
+                box.style.width = newW + "px";
+                box.style.height = newH + "px";
+                boxHelper.style.width = newW + "px";
+                boxHelper.style.height = newH + "px";
+                // ------------------------------------
+                setBoxPos({ ...boxPos, left: boxPos.left + newX, });
+                console.log("box pos test::: ", boxPos);
+            }
+            setPrev({ x: e.clientX, y: e.clientY });
+
+        } else if (resize.state && resize.direction === "e") { //not left 
+            initW = box?.offsetWidth;
+            initH = box?.offsetHeight;
+            rotatedWDiff = COS * wDiff + SIN * hDiff;
+            rotatedWDiff = COS * wDiff + SIN * hDiff;
+
+            newX += 0.5 * rotatedWDiff * COS;
+            newY += 0.5 * rotatedWDiff * SIN;
+
+            if (box && boxHelper) {
+                box.style.width = newW + "px";
+                box.style.height = newH + "px";
+                boxHelper.style.width = newW + "px";
+                boxHelper.style.height = newH + "px";
+                // ------------------------------------
+                setBoxPos({ ...boxPos, left: boxPos.left + newX, });
+                console.log("box pos test::: ", box.style.width, box.style.height);
+            }
+            setPrev({ x: e.clientX, y: e.clientY });
 
         }
         setCenterOfBox();
+    };
+
+
+
+    //DESC:: 회전 후에  A` 좌표들을 반환하는 함수. 필요한 값: rect의 x,y좌표(좌상단), CenterOfRect, 각도(angle)
+    const rotateMatrix = (x: number, y: number, cx: number, cy: number, angle: number) => {
+        return [
+            (x - cx) * Math.cos(angle) - (y - cy) * Math.sin(angle) + cx,
+            (x - cx) * Math.sin(angle) + (y - cy) * Math.cos(angle) + cy,
+        ];
     };
 
     return <Fragment>
@@ -183,7 +275,7 @@ const Home: FunctionalComponent = () => {
                         style={{
                             left: boxPos.left,
                             top: boxPos.top,
-                            transform: `rotate(${deg}deg)`,
+                            transform: `rotate(${degree}deg)`,
                         }}
                     >
                         <div class={style.targetLine}>
@@ -204,7 +296,42 @@ const Home: FunctionalComponent = () => {
                             id="controlBox"
                             class={style.controlBox}
                         >
-                            {controlElems}
+                            <div
+                                id="east"
+                                class={style.resizeControl}
+                                data-id={"e"}
+                                onMouseDown={(e) => {
+                                    setResize({ direction: "e", state: true });
+                                    setPrev({ x: e.clientX, y: e.clientY });
+                                }}
+                            />
+
+                            <div
+                                class={style.resizeControl}
+                                data-id={"w"}
+                                onMouseDown={(e) => {
+                                    setResize({ direction: "w", state: true });
+                                    setPrev({ x: e.clientX, y: e.clientY });
+                                }}
+                            />
+                            <div
+                                class={style.resizeControl}
+                                data-id={"se"}
+                                onMouseDown={(e) => {
+                                    setResize({ direction: "se", state: true });
+                                    setPrev({ x: e.clientX, y: e.clientY });
+                                }}
+                            />
+                            {/* 
+                            <div
+                                id="nw"
+                                class={style.resizeControl}
+                                data-id={"nw"}
+                                onMouseDown={(e) => {
+                                    setResize({ direction: "nw", state: true });
+                                    setPrev({ x: e.clientX, y: e.clientY });
+                                }}
+                            /> */}
                         </div>
                         <div
                             id="backimage"
@@ -220,8 +347,8 @@ const Home: FunctionalComponent = () => {
                                 id="img"
                                 class={style.uploadImg}
                                 draggable={false}
-                                src={file}
-                                // src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                                // src={file}
+                                src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
                                 tabIndex={-1}
                                 onLoad={() => setMoveableSize()}
                             />
