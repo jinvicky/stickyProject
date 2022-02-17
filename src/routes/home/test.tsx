@@ -141,10 +141,81 @@ const Home: FunctionalComponent = () => {
                 b.style.height = newH + "px";
                 setBoxPos({ left: newX, top: newY });
                 setCenterOfBox();
+            } else if (resize.state && resize.direction === "ne") {
+                /**
+                 * 북동쪽.
+                 * top : true, left: false; 
+                 */
+                newW = initW + rotatedWDiff;
+                newH = initH - rotatedHDiff;
+
+                newX += 0.5 * rotatedWDiff * cosFraction;
+                newY += 0.5 * rotatedWDiff * sinFraction;
+
+                newX -= 0.5 * rotatedHDiff * sinFraction;
+                newY += 0.5 * rotatedHDiff * cosFraction;
+
+                b.style.width = newW + "px";
+                b.style.height = newH + "px";
+                setBoxPos({ left: newX, top: newY });
+                setCenterOfBox();
+            } else if (resize.state && resize.direction === "se") {
+                /**
+                 * 남동쪽 
+                 * top: false, left: false; 
+                 */
+
+                newW = initW + rotatedWDiff;
+                newH = initH + rotatedHDiff;
+
+                newX += 0.5 * rotatedWDiff * cosFraction;
+                newY += 0.5 * rotatedWDiff * sinFraction;
+
+                newX -= 0.5 * rotatedHDiff * sinFraction;
+                newY += 0.5 * rotatedHDiff * cosFraction;
+
+                b.style.width = newW + "px";
+                b.style.height = newH + "px";
+                setBoxPos({ left: newX, top: newY });
+                setCenterOfBox();
+            } else if (resize.state && resize.direction === "nw") {
+                /**
+                 * 북서쪽 
+                 * top: true, left: true
+                 */
+                newW = initW - rotatedWDiff;
+                newH = initH - rotatedHDiff;
+
+                newX += 0.5 * rotatedWDiff * cosFraction;
+                newY += 0.5 * rotatedWDiff * sinFraction;
+
+                newX -= 0.5 * rotatedHDiff * sinFraction;
+                newY += 0.5 * rotatedHDiff * cosFraction;
+
+                b.style.width = newW + "px";
+                b.style.height = newH + "px";
+                setBoxPos({ left: newX, top: newY });
+                setCenterOfBox();
+            } else if (resize.state && resize.direction === "sw") {
+                /**
+                 * 남서쪽 
+                 * top: false, left: true
+                 */
+                newW = initW - rotatedWDiff;
+                newH = initH + rotatedHDiff;
+
+                newX += 0.5 * rotatedWDiff * cosFraction;
+                newY += 0.5 * rotatedWDiff * sinFraction;
+                newX -= 0.5 * rotatedHDiff * sinFraction;
+                newY += 0.5 * rotatedHDiff * cosFraction;
+
+                b.style.width = newW + "px";
+                b.style.height = newH + "px";
+                setBoxPos({ left: newX, top: newY });
+                setCenterOfBox();
             }
         }
     };
-
 
 
     return <Fragment>
@@ -276,6 +347,90 @@ const Home: FunctionalComponent = () => {
                                     data-id={"s"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "s", state: true });
+                                        setPrev({ x: e.clientX, y: e.clientY });
+                                        mousePress = { x: e.clientX, y: e.clientY };
+
+                                        const box = document.getElementById("moveableBox");
+                                        if (box) {
+                                            initW = box.offsetWidth;
+                                            initH = box.offsetHeight;
+
+                                            initX = box.offsetLeft;
+                                            initY = box.offsetTop;
+
+                                            initRotate = degree;
+                                        }
+                                    }}
+                                />
+                                <div
+                                    id="northeast"
+                                    class={style.resizeControl}
+                                    data-id={"ne"}
+                                    onMouseDown={(e) => {
+                                        setResize({ direction: "ne", state: true });
+                                        setPrev({ x: e.clientX, y: e.clientY });
+                                        mousePress = { x: e.clientX, y: e.clientY };
+
+                                        const box = document.getElementById("moveableBox");
+                                        if (box) {
+                                            initW = box.offsetWidth;
+                                            initH = box.offsetHeight;
+
+                                            initX = box.offsetLeft;
+                                            initY = box.offsetTop;
+
+                                            initRotate = degree;
+                                        }
+                                    }}
+                                />
+                                <div
+                                    id="southeast"
+                                    class={style.resizeControl}
+                                    data-id={"se"}
+                                    onMouseDown={(e) => {
+                                        setResize({ direction: "se", state: true });
+                                        setPrev({ x: e.clientX, y: e.clientY });
+                                        mousePress = { x: e.clientX, y: e.clientY };
+
+                                        const box = document.getElementById("moveableBox");
+                                        if (box) {
+                                            initW = box.offsetWidth;
+                                            initH = box.offsetHeight;
+
+                                            initX = box.offsetLeft;
+                                            initY = box.offsetTop;
+
+                                            initRotate = degree;
+                                        }
+                                    }}
+                                />
+                                <div
+                                    id="northwest"
+                                    class={style.resizeControl}
+                                    data-id={"nw"}
+                                    onMouseDown={(e) => {
+                                        setResize({ direction: "nw", state: true });
+                                        setPrev({ x: e.clientX, y: e.clientY });
+                                        mousePress = { x: e.clientX, y: e.clientY };
+
+                                        const box = document.getElementById("moveableBox");
+                                        if (box) {
+                                            initW = box.offsetWidth;
+                                            initH = box.offsetHeight;
+
+                                            initX = box.offsetLeft;
+                                            initY = box.offsetTop;
+
+                                            initRotate = degree;
+                                        }
+                                    }}
+                                />
+                                <div
+                                    id="souththwest"
+                                    class={style.resizeControl}
+                                    data-id={"sw"}
+                                    onMouseDown={(e) => {
+                                        setResize({ direction: "sw", state: true });
                                         setPrev({ x: e.clientX, y: e.clientY });
                                         mousePress = { x: e.clientX, y: e.clientY };
 
