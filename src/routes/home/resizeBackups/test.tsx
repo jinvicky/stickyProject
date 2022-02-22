@@ -5,12 +5,18 @@ import style from './styleTest.scss';
 let mousePress = { x: 0, y: 0 };
 let initX = 0;
 let initY = 0;
-let newW, newH;
+let newW = 0;
+let newH = 0;
 let newX = 0;
 let newY = 0;
 let initRotate = 0;
 let initW = 0;
 let initH = 0;
+
+
+
+let rx = 1;
+let ry = 1;
 
 let imgOffset = { x: 0, y: 0 };
 
@@ -71,7 +77,7 @@ const Home: FunctionalComponent = () => {
     };
 
     useEffect(() => {
-        setCenterOfBox()
+        setCenterOfBox();
     }, []);
 
     const rotateBox = (e: MouseEvent) => {
@@ -82,8 +88,41 @@ const Home: FunctionalComponent = () => {
     };
 
     //DESC:: control mousedown시 시작하는 e.clientX,Y 저장
-    const [prev, setPrev] = useState({ x: 0, y: 0 });
-    const [resize, setResize] = useState({ direction: "e", state: false });
+    const [resize, setResize] = useState({ direction: "", state: false });
+
+    const [controller, setController] = useState({ state: false, top: false, left: false });
+
+    const controllerSetting = (e: MouseEvent, left: boolean, top: boolean) => {
+        // setController({ state: true, left: left, top: top });
+        mousePress = { x: e.clientX, y: e.clientY };
+
+        const box = document.getElementById("moveableBox");
+        if (box) {
+            initW = box.offsetWidth;
+            initH = box.offsetHeight;
+
+            initX = box.offsetLeft;
+            initY = box.offsetTop;
+
+            initRotate = degree;
+        }
+    };
+
+
+    //rx, ry를 사용해서 계산하는 테스트 함수. 
+    const calculateXY = (rotatedWDiff: number) => {
+        newX = newX + 0.5 * rotatedWDiff * cosFraction * rx;
+        newY = newY + 0.5 * rotatedWDiff * sinFraction * ry;
+
+    };
+
+    const repositBox = (b: HTMLElement) => {
+
+        b.style.width = newW + "px";
+        b.style.height = newH + "px";
+        setBoxPos({ left: newX, top: newY });
+        setCenterOfBox();
+    }
 
 
     const initRad = initRotate * Math.PI / 180;
@@ -93,7 +132,6 @@ const Home: FunctionalComponent = () => {
 
     const resizeBox = (e: MouseEvent) => {
         const b = document.getElementById("moveableBox");
-        const ch = document.getElementById("cursorHelper");
 
         let wDiff = e.clientX - mousePress.x;
         let hDiff = e.clientY - mousePress.y;
@@ -106,41 +144,44 @@ const Home: FunctionalComponent = () => {
         newX = initX;
         newY = initY;
 
-        if (b) {
-            if (resize.state && resize.direction === "e") {
-                newW = initW + rotatedWDiff; // not left;
-                newX += 0.5 * rotatedWDiff * cosFraction;
-                newY += 0.5 * rotatedWDiff * sinFraction;
 
-                b.style.width = newW + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+        if (b) {
+
+            if (resize.state && resize.direction === "e") {
+                // if (controller.state && !controller.left && !controller.top) { //e
+
+                newW = initW + rotatedWDiff; // not left;
+                // newX += 0.5 * rotatedWDiff * cosFraction;
+                // newY += 0.5 * rotatedWDiff * sinFraction;
+
+                rx = 1;
+                rx = 1;
+
+
+
             } else if (resize.state && resize.direction === "w") {
                 newW = initW - rotatedWDiff; // left;
                 newX += 0.5 * rotatedWDiff * cosFraction;
                 newY += 0.5 * rotatedWDiff * sinFraction;
 
-                b.style.width = newW + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
+
             } else if (resize.state && resize.direction === "n") {
                 newH = initH - rotatedHDiff; // top; pb
 
                 newX -= 0.5 * rotatedHDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
-                b.style.height = newH + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
+
             } else if (resize.state && resize.direction === "s") {
                 newH = initH + rotatedHDiff; // not top;
 
                 newX -= 0.5 * rotatedHDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
-                b.style.height = newH + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
+
             } else if (resize.state && resize.direction === "ne") {
                 /**
                  * 북동쪽.
@@ -155,10 +196,7 @@ const Home: FunctionalComponent = () => {
                 newX -= 0.5 * rotatedHDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
-                b.style.width = newW + "px";
-                b.style.height = newH + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
             } else if (resize.state && resize.direction === "se") {
                 /**
                  * 남동쪽 
@@ -174,10 +212,7 @@ const Home: FunctionalComponent = () => {
                 newX -= 0.5 * rotatedHDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
-                b.style.width = newW + "px";
-                b.style.height = newH + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
             } else if (resize.state && resize.direction === "nw") {
                 /**
                  * 북서쪽 
@@ -192,10 +227,7 @@ const Home: FunctionalComponent = () => {
                 newX -= 0.5 * rotatedHDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
-                b.style.width = newW + "px";
-                b.style.height = newH + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
             } else if (resize.state && resize.direction === "sw") {
                 /**
                  * 남서쪽 
@@ -209,11 +241,11 @@ const Home: FunctionalComponent = () => {
                 newX -= 0.5 * rotatedHDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
-                b.style.width = newW + "px";
-                b.style.height = newH + "px";
-                setBoxPos({ left: newX, top: newY });
-                setCenterOfBox();
+                repositBox(b);
             }
+            //moveablespace를 mousemove만 해도 작동하기 때문에 오류가 생겼던 것.
+            if (resize.state)
+                repositBox(b);
         }
     };
 
@@ -230,6 +262,7 @@ const Home: FunctionalComponent = () => {
                 }}
                 onMouseUp={() => {
                     setResize({ ...resize, state: false });
+                    // setController({ state: false, top: false, left: false });
                     setRotate(false);
                     setDrag(false);
                 }}
@@ -284,19 +317,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"e"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "e", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -305,19 +326,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"w"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "w", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -326,19 +335,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"n"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "n", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -347,19 +344,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"s"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "s", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -368,19 +353,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"ne"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "ne", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -389,19 +362,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"se"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "se", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -410,19 +371,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"nw"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "nw", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                                 <div
@@ -431,19 +380,7 @@ const Home: FunctionalComponent = () => {
                                     data-id={"sw"}
                                     onMouseDown={(e) => {
                                         setResize({ direction: "sw", state: true });
-                                        setPrev({ x: e.clientX, y: e.clientY });
-                                        mousePress = { x: e.clientX, y: e.clientY };
-
-                                        const box = document.getElementById("moveableBox");
-                                        if (box) {
-                                            initW = box.offsetWidth;
-                                            initH = box.offsetHeight;
-
-                                            initX = box.offsetLeft;
-                                            initY = box.offsetTop;
-
-                                            initRotate = degree;
-                                        }
+                                        controllerSetting(e, false, false);
                                     }}
                                 />
                             </div>
@@ -451,12 +388,10 @@ const Home: FunctionalComponent = () => {
                                 id="img"
                                 class={style.uploadImg}
                                 draggable={false}
-                                // src={file}
                                 src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
-                                tabIndex={-1}
                                 style={{
                                     width: "100%",
-                                    height: "100%"
+                                    height: "100%",
                                 }}
                                 onMouseDown={(e) => {
                                     boxMouseDown(e);
