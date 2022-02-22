@@ -1,19 +1,71 @@
-import { Fragment, FunctionalComponent, h } from 'preact';
+import { createContext, Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './dragUpgrade.scss';
-import { Dot, Line, LineDir } from './type';
+import { Dot, Line, LineDir } from '../type';
 
 let imgOffset = { x: 0, y: 0 };
 
+//네 점의 순서는 시계방향으로 픽스. 
+const cLocation = {
+    c1: { x: 0, y: 0 },
+    c2: { x: 0, y: 0 },
+    c3: { x: 0, y: 0 },
+    c4: { x: 0, y: 0 },
+};
+
+//box로 할 건지 img로 할 건지 통일이 필요한 것 같음. 일단 b, c 보단 i,c가 
+// 구별이 더 잘 갈 것 같아서 i로 수정. 
+const iLocation = {
+    i1: { x: 0, y: 0 },
+    i2: { x: 0, y: 0 },
+    i3: { x: 0, y: 0 },
+    i4: { x: 0, y: 0 },
+};
 const Home: FunctionalComponent = () => {
 
     const [rotate, setRotate] = useState(false);
     const [degree, setDegree] = useState(0);
     const [center, setCenter] = useState({ x: 0, y: 0 });
 
-    //movePosOfBox에서 호출하는 함수. 
+
+    const getCanvasPos = () => {
+        const el = document.getElementById("canvas");
+        if (el) {
+            const cRect = el.getBoundingClientRect();
+            cLocation.c1 = { x: cRect.left, y: cRect.top };
+            cLocation.c2 = { x: cRect.right, y: cRect.top };
+            cLocation.c3 = { x: cRect.left, y: cRect.bottom };
+            cLocation.c4 = { x: cRect.right, y: cRect.bottom };
+        }
+
+    };
+
+    const checkLineIntersect = () => {
+        const im = document.getElementById("img");
+        if (im) {
+            const iRect = im.getBoundingClientRect();
+            iLocation.i1 = { x: iRect.left, y: iRect.top };
+            iLocation.i2 = { x: iRect.right, y: iRect.top };
+            iLocation.i3 = { x: iRect.left, y: iRect.bottom };
+            iLocation.i4 = { x: iRect.right, y: iRect.bottom };
+        }
+
+        areDotsCollided(cLocation.c1, cLocation.c2, iLocation.i1, iLocation.i2);
+
+    };
+
+    const areDotsCollided = (p1: Dot, p2: Dot, p3: Dot, p4: Dot) => {
+
+        let sign1 = (p2.x - p1.x) * (p3.y - p1.y) - (p3.x - p1.x) * (p2.y - p1.y);
+        let sign2 = (p2.x - p1.x) * (p4.y - p1.y) - (p4.x - p1.x) * (p2.y - p1.y);
+
+        let sign3 = (p4.x - p3.x) * (p1.y - p3.y) - (p1.x - p3.x) * (p4.y - p3.y);
+        let sign4 = (p4.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p4.y - p3.y);
+
+        return sign1 * sign2 < 0 && sign3 * sign4 < 0;
 
 
+    }
 
 
     const movePosOfBox = useCallback((e: MouseEvent) => {
@@ -77,23 +129,16 @@ const Home: FunctionalComponent = () => {
 
     useEffect(() => setCenterOfBox(), []);
 
-    const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
-
-    const controlElems = controlArray.map((direction2, idx) => {
-        return <div key={idx}
-            class={style.resizeControl}
-            data-id={`${direction2}`}
-            id={`${direction2}`}
-        />;
-    });
-
     return <Fragment>
         <div class={style.root}>
             <div
                 id="moveableSpace"
                 class={style.moveableSpace}
                 onMouseMove={(e) => {
-                    if (drag) movePosOfBox(e);
+                    if (drag) {
+                        movePosOfBox(e);
+                        checkLineIntersect();
+                    }
                     rotateBox(e);
                 }}
                 onMouseUp={() => {
@@ -136,17 +181,11 @@ const Home: FunctionalComponent = () => {
                             id="centerPoint"
                             class={style.centerPoint}
                         />
-                        <div
-                            id="controlBox"
-                            class={style.controlBox}
-                        >
-                            {controlElems}
-                        </div>
                         <img
                             id="img"
                             class={style.uploadImg}
                             draggable={false}
-                            src="https://i.ytimg.com/vi/Sedb9CFp-9k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLDZuz1mRyPLNEYDMaQYArjyOct6Yg"
+                            src="https://i.ytimg.com/vi/_YdFyzU8ryA/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLBR6md7CYHbQvWNRJCLdX3ZENSYlg"
                             style={{
                                 width: 250,
                                 height: 200,
@@ -154,6 +193,7 @@ const Home: FunctionalComponent = () => {
                             onMouseDown={(e) => {
                                 setDrag(true);
                                 setImgOffset(e);
+                                getCanvasPos();
                             }}
                             onMouseUp={() => {
                                 boxMouseUp();
