@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from 'preact';
 import { Route, Router } from 'preact-router';
 
-import Home from '../routes/home/collision/dragUpgrade';
+import Home from '../routes/home/resizeRefactoring/eResize';
 
 const App: FunctionalComponent = () => {
     return (

@@ -30,6 +30,9 @@ const Home: FunctionalComponent = () => {
 
 
     const [drag, setDrag] = useState(false);
+
+    const [tPos, setTPos] = useState({ left: 100, top: 100 });
+
     const [boxPos, setBoxPos] = useState({ top: 100, left: 100 });
 
     //DESC:: .boxWrapper를 mousedown할 때 실행하는 함수. 
@@ -58,6 +61,7 @@ const Home: FunctionalComponent = () => {
             let y = e.clientY - elRect.top - imgOffset.y;
 
             setBoxPos({ left: x, top: y });
+            setTPos({ left: e.clientX - imgOffset.x, top: e.clientY - imgOffset.y });
         }
     }, []);
 
@@ -179,7 +183,19 @@ const Home: FunctionalComponent = () => {
     const repositBox = (b: HTMLElement) => {
         b.style.width = newW + "px";
         b.style.height = newH + "px";
+
+
+        //테스트 삼아서 #fakeControl의 width, height도 같이 변경해본다. 
+        const f = document.getElementById("fakeControl");
+        if (f) {
+            f.style.width = newW + "px";
+            f.style.height = newH + "px";
+        }
+
+
+
         setBoxPos({ left: newX, top: newY });
+        setTPos({ left: newX, top: newY });
         setCenterOfBox();
     };
 
@@ -229,6 +245,8 @@ const Home: FunctionalComponent = () => {
         />;
     });
 
+
+
     return <Fragment>
         <div class={style.root}>
             <div
@@ -246,9 +264,50 @@ const Home: FunctionalComponent = () => {
                     setDrag(false);
                 }}
             >
+                <div id="fakeWrapper"
+                    style={{
+                        border: "1px solid red",
+                        position: "absolute",
+                        transformOrigin: "top left",
+                    }}
+                >
+                    <div
+
+                        id="fakeControl"
+                        style={{
+                            border: "1px solid blue",
+                            position: "absolute",
+                            left: boxPos.left,
+                            top: boxPos.top,
+                            display: "inline-block",
+                            zIndex: 900,
+                            width: 300,
+                            height: 300,
+                            transform: `translate(-50%, -50%) rotate(${degree}deg)`,
+
+                        }}>
+
+                        <div
+                            style={{
+                                position: "absolute",
+                                width: 10,
+                                height: 10,
+                                background: "red",
+                                display: "inline-block",
+                                zIndex: 900,
+                                transformOrigin: "top left",
+                                transform: `translate(-50%, -50%)`,
+                            }}
+                        />
+                    </div>
+                </div>
+
                 <div
                     id="canvas"
                     class={style.canvas}
+                    style={{
+                        overflow: "hidden"
+                    }}
                 >
                     <div
                         id="cursorHelper"

@@ -53,7 +53,6 @@ const Home: FunctionalComponent = () => {
                     x: dotRect.left + (dotRect.width / 2),
                     y: dotRect.top + (dotRect.height / 2),
                 };
-
             }
         }
     };
@@ -153,6 +152,10 @@ const Home: FunctionalComponent = () => {
         }
     };
 
+    const [boxPos, setBoxPos] = useState({ top: 100, left: 100 });
+    //control의 position 테스트.
+    const [tPos, setTPos] = useState({ left: 100, top: 100 });
+
     const movePosOfBox = useCallback((e: MouseEvent) => {
 
         const el = document.getElementById("canvas");
@@ -162,6 +165,8 @@ const Home: FunctionalComponent = () => {
             let y = e.clientY - elRect.top - imgOffset.y;
 
             setBoxPos({ left: x, top: y });
+            // setTPos({ left: e.clientX - imgOffset.x, top: e.clientY - imgOffset.y });
+            setTPos({ left: x, top: y });
         }
     }, []);
 
@@ -194,7 +199,6 @@ const Home: FunctionalComponent = () => {
     };
 
     const [drag, setDrag] = useState(false);
-    const [boxPos, setBoxPos] = useState({ top: 100, left: 100 });
 
     //DESC:: 이미지의 offset을 지정하는 함수 
     const setImgOffset = (e: MouseEvent) => {
@@ -213,7 +217,15 @@ const Home: FunctionalComponent = () => {
         setCenterOfBox();
     }
 
-    useEffect(() => setCenterOfBox(), [boxPos]);
+    useEffect(() => {
+        //이미지 좌표가 움직일 때마다 
+
+
+        setCenterOfBox();
+
+    }, [boxPos]);
+
+
 
     const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
 
@@ -245,8 +257,25 @@ const Home: FunctionalComponent = () => {
                 }}
             >
                 <div
+                    style={{
+                        position: "absolute",
+                        left: tPos.left,
+                        top: tPos.top,
+                        width: 10,
+                        height: 10,
+                        background: "red",
+                        display: "inline-block",
+                        zIndex: 900,
+                        marginTop: -6,
+                        marginLeft: -6,
+                    }}
+                />
+                <div
                     id="canvas"
                     class={style.canvas}
+                    style={{
+                        overflow: "hidden",
+                    }}
                 >
                     <div
                         id="cursorHelper"
@@ -256,6 +285,7 @@ const Home: FunctionalComponent = () => {
                             top: boxPos.top,
                         }}
                     ></div>
+
                     <div
                         id="moveableBox"
                         class={style.moveableBox}
@@ -278,9 +308,6 @@ const Home: FunctionalComponent = () => {
                         <div
                             id="controlBox"
                             class={style.controlBox}
-                            style={{
-                                opacity: 0.4
-                            }}
                         >
                             {controlElems}
                         </div>
