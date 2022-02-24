@@ -1,29 +1,24 @@
 import { Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './dragUpgrade.scss';
-import { Dot, iObj, test } from '../type';
+import { Dot, LocationObj } from '../type';
 
 let imgOffset = { x: 0, y: 0 };
 
 //global로 선언해야 함.
 //네 점의 순서는 시계방향으로 픽스. 
-const cLocation = {
+const cLocation: LocationObj = {
     c1: { x: 0, y: 0 },
     c2: { x: 0, y: 0 },
     c3: { x: 0, y: 0 },
     c4: { x: 0, y: 0 },
 };
-const iLocation: iObj = {};
-
-/**
- * 
- * 문제풀이 과정 
- * 1. iArray랑 cArray 배열을 각각 만들고 거기에 { }
- * 
- * object.entries()를 쓰면 key, value를 모두 반환한다. 
- * 그러면 key를 보고 판단해서 c4인 경우에 두번째 파람으로 c1을 넣으면 되긴 하는데 
- * 그러면 [i+1]식의 시계방향 비교가 안된다. 
- */
+const iLocation: LocationObj = {
+    i1: { x: 0, y: 0 },
+    i2: { x: 0, y: 0 },
+    i3: { x: 0, y: 0 },
+    i4: { x: 0, y: 0 },
+};
 
 const Home: FunctionalComponent = () => {
 
@@ -32,7 +27,8 @@ const Home: FunctionalComponent = () => {
     const [center, setCenter] = useState({ x: 0, y: 0 });
 
 
-    const getCanvasPos = () => {
+    //캔버스의 좌표를 cLocation에 저장하기.
+    const getPositionOfCanvas = () => {
         const el = document.getElementById("canvas");
         if (el) {
             const cRect = el.getBoundingClientRect();
@@ -40,14 +36,13 @@ const Home: FunctionalComponent = () => {
             cLocation.c2 = { x: cRect.right, y: cRect.top };
             cLocation.c3 = { x: cRect.right, y: cRect.bottom };
             cLocation.c4 = { x: cRect.left, y: cRect.bottom };
-
-
         }
     };
 
     const edgeArr = ["nw", "ne", "se", "sw"];
 
-    const getImgPos = () => {
+    //edgdArr을 사용해서 control의 중간 좌표를 이미지 모서리 좌표로 지정하기.
+    const getPositionOfImg = () => {
         for (let i = 0; i < edgeArr.length; i++) {
             const dotRef = document.querySelector(`[data-id=${edgeArr[i]}]`);
             if (dotRef) {
@@ -64,52 +59,74 @@ const Home: FunctionalComponent = () => {
     };
 
     const [imgOut, setImgOut] = useState(false);
-    const isImgOutOfCanvas = () => {
 
-        const b = document.getElementById("img");
+    //이미지를 튕길 지 말지 여부를 검사하기.
+    const imgFlipValidation = () => {
+
+        getPositionOfImg();
+
+        if (isImgOutOfCanvas() && !areLinesIntersected())
+            setImgOut(true);
+        else setImgOut(false);
+    };
+
+    const isImgOutOfCanvas = (): boolean => {
+        const i = document.getElementById("img");
         const c = document.getElementById("canvas");
-        if (b && c) {
-            const iRect = b.getBoundingClientRect();
+        if (i && c) {
+            const iRect = i.getBoundingClientRect();
             const cRect = c.getBoundingClientRect();
 
-            /**
-             * 이미지의 top이 캔버스의 bottom 보다 크면 탈출.
-             * 이미지의 bottom이 캔버스의 top 보다 작으면 탈출.
-             * 이미지의 left가 캔버스의 right 보다 크면 탈출.
-             * 이미지의 right가 캔버스의 left 보다 작으면 탈출.
-             */
+            if (iRect.left < cRect.left ||
+                iRect.right > cRect.right ||
+                iRect.top < cRect.top ||
+                iRect.bottom > cRect.bottom)
 
-            if (iRect.top > cRect.bottom ||
-                iRect.bottom < cRect.top ||
-                iRect.left > cRect.right ||
-                iRect.right < cRect.left)
                 return true;
         }
         return false;
     };
 
-    const checkImgOut = () => { // 두 메서드를 사용해서 imgOut 상태 관리하는 함수. 
-        // 이미지 모서리 좌표 구하기 
-        getImgPos();
-        // 캔버스 바깥에 있고 선분 겹침도 없으면 flipImg 함수를 활성화 시키기. 
+    //선분 교차 여부 검사하기.
+    const areLinesIntersected = (): boolean => {
 
+        let isOut = false;
 
-        // if (isImgOutOfCanvas() && checkLineIntersect()) setImgOut(true);
+        for (let i = 1; i <= Object.keys(cLocation).length; i++) {
+            for (let j = 1; j <= Object.keys(iLocation).length; j++) {
+                if (i === Object.keys(cLocation).length) {
+                    isOut = areDotsCollided(
+                        cLocation[`c${i}`],
+                        cLocation[`c${1}`],
+                        iLocation[`i${j}`],
+                        iLocation[`i${j + 1}`],
+                    );
+                    if (isOut) return isOut;
+                    break;
+                }
+                if (j === Object.keys(iLocation).length) {
+                    isOut = areDotsCollided(
+                        cLocation[`c${i}`],
+                        cLocation[`c${i + 1}`],
+                        iLocation[`i${j}`],
+                        iLocation[`i${1}`],
+                    );
+                    if (isOut) return isOut;
+                    break;
+                }
+                isOut = areDotsCollided(
+                    cLocation[`c${i}`],
+                    cLocation[`c${i + 1}`],
+                    iLocation[`i${j}`],
+                    iLocation[`i${j + 1}`],
+                );
+                if (isOut) return isOut;
+            }
+        }
+        return isOut;
     };
 
-    const checkLineIntersect = () => {
-        //16번 선분 비교를 수행한다. 16번이 모두 겹치지 않아야 true를 반환한다.
-        /**areDotsCollided() 함수를 16번 돌려야 한다.
-         * 다만 선분이 대각선이 되지 않는 조합이어야 한다. 
-         * 
-         * 안되는 조합 : c1과 c3, c2와 c4, i1과 i3, i2와 i4.  (반대도 마찬가지)
-         * 그러면 대각선을 방지하는 메서드를 하나 더 만들어야 하나
-         * 
-         * 
-         * */
-        return true;
-    };
-
+    //선분 교차 여부 검사기가 사용하는 교차검사메서드
     const areDotsCollided = (p1: Dot, p2: Dot, p3: Dot, p4: Dot) => {
 
         if (Math.max(p1.x, p2.x) < Math.min(p3.x, p4.x)) return false;
@@ -128,35 +145,13 @@ const Home: FunctionalComponent = () => {
         return sign1 * sign2 <= 0 && sign3 * sign4 <= 0;
     };
 
-    //DESC:: 이미지 튕기기 메서드.
+    //이미지 튕기기.
     const flipImg = () => {
         if (imgOut) {
             setBoxPos({ left: 400, top: 200 });
             setImgOut(false);
         }
     };
-
-    const boxArray = ["c1", "c2", "c3", "c4"];
-    const vasArray = ["i5", "i6", "i7", "i8"];
-
-
-    const finalObj: test = [{ L1: { p1: "", p2: "" }, L2: { p1: "", p2: "" } }];
-
-    //콘솔 테스트 함수 
-    const consoleTest = () => {
-
-        for (let i = 0; i < boxArray.length; i++) {
-            for (let j = 0; j < vasArray.length; j++) {
-                finalObj.push({
-                    L1: { p1: boxArray[i], p2: boxArray[i] === "c4" ? "c1" : boxArray[i + 1] },
-                    L2: { p1: vasArray[j], p2: vasArray[j] === "i8" ? "i5" : vasArray[j + 1] }
-                });
-            }
-        }
-        console.log("테스트, ", finalObj);
-
-
-    }
 
     const movePosOfBox = useCallback((e: MouseEvent) => {
 
@@ -239,7 +234,7 @@ const Home: FunctionalComponent = () => {
                     if (drag) {
                         movePosOfBox(e);
                     }
-                    checkImgOut();
+                    imgFlipValidation();
                     rotateBox(e);
                 }}
                 onMouseUp={() => {
@@ -247,7 +242,6 @@ const Home: FunctionalComponent = () => {
                     setDrag(false);
                     flipImg();
 
-                    consoleTest();
                 }}
             >
                 <div
@@ -296,13 +290,13 @@ const Home: FunctionalComponent = () => {
                             draggable={false}
                             src="https://i.ytimg.com/vi/_YdFyzU8ryA/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLBR6md7CYHbQvWNRJCLdX3ZENSYlg"
                             style={{
-                                width: 250,
-                                height: 200,
+                                width: 200,
+                                height: 150,
                             }}
                             onMouseDown={(e) => {
                                 setDrag(true);
                                 setImgOffset(e);
-                                getCanvasPos();
+                                getPositionOfCanvas();
                             }}
                             onMouseUp={() => {
                                 boxMouseUp();
