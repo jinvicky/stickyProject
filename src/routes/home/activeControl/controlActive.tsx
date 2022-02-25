@@ -111,9 +111,6 @@ const Home: FunctionalComponent = () => {
         rotate && setDegree(Math.round(degree));
     };
 
-    //DESC:: control mousedown시 시작하는 e.clientX,Y 저장
-    const [resize, setResize] = useState({ direction: "", state: false });
-
     const [controller, setController] = useState(false);
 
     const checkDirection = (e: MouseEvent) => {
@@ -158,7 +155,6 @@ const Home: FunctionalComponent = () => {
         }
         setController(true);
     };
-
 
     //resize 종료 시 rx, rw, rh 값을 초기화. ry는 1로 변하지 않더라.
     const resetRVariable = () => {
@@ -306,17 +302,10 @@ const Home: FunctionalComponent = () => {
                                 onMouseUp={() => setRotate(false)}
                             />
                         </div>
-                        <div id="dragTest"
-                            style={{
-                                width: "100%",
-                                height: "100%"
-                            }}
-                            onMouseDown={(e) => {
-                                boxMouseDown(e);
-                            }}
-                            onMouseUp={() => {
-                                boxMouseUp();
-                            }}
+                        <div id="draggableSpace"
+                            class={style.draggableSpace}
+                            onMouseDown={(e) => boxMouseDown(e)}
+                            onMouseUp={() => boxMouseUp()}
                         />
                         <div
                             id="controlBox"
