@@ -68,15 +68,10 @@ $primary: #4af;
 				visibility: visible;
 			}
 		}
-		.backImage {
+		.uploadImg {
+			display: block;
 			width: 100%;
 			height: 100%;
-
-			> .uploadImg {
-				display: block;
-				width: 100%;
-				height: 100%;
-			}
 		}
 	} // end of .moveSP
 }
@@ -101,6 +96,25 @@ $primary: #4af;
 		border: 2px solid $primary;
 		border-radius: 50%;
 		background-color: rgb(184, 27, 100);
+	}
+}
+
+.controllerBoxWrapper {
+	position: absolute;
+	transform-origin: top left;
+
+	> .controllerBox {
+		border: 1px solid blue;
+		position: absolute;
+		z-index: 100;
+	}
+}
+
+.moveableBoxWrapper {
+	position: absolute;
+	transform-origin: "top left";
+
+	> .moveableBox {
 	}
 }
 

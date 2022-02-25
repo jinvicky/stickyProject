@@ -97,6 +97,11 @@ const Home: FunctionalComponent = () => {
 
     useEffect(() => {
         setCenterOfBox();
+        const c = document.getElementById("canvas");
+        if (c) {
+            const cRect = c.getBoundingClientRect();
+            setTPos({ left: 200 + cRect.left, top: 200 + cRect.top });
+        }
     }, []);
 
     const rotateBox = (e: MouseEvent) => {
@@ -247,7 +252,6 @@ const Home: FunctionalComponent = () => {
 
     };
 
-
     const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
 
     const controlElems = controlArray.map((direction2, idx) => {
@@ -257,7 +261,6 @@ const Home: FunctionalComponent = () => {
             onMouseDown={(e) => controllerSetting(e)}
         />;
     });
-
 
 
     return <Fragment>
@@ -277,34 +280,20 @@ const Home: FunctionalComponent = () => {
                     setDrag(false);
                 }}
             >
-                <div id="fakeWrapper"
-                    style={{
-                        border: "1px solid yellow",
-                        position: "absolute",
-                        transformOrigin: "top left",
-                    }}
+                <div
+                    id="fakeWrapper"
+                    class={style.controllerBoxWrapper}
                 >
                     <div
                         id="fakeControl"
+                        class={style.controllerBox}
                         style={{
-                            border: "1px solid blue",
-                            position: "absolute",
                             left: tPos.left,
                             top: tPos.top,
-                            display: "inline-block",
-                            zIndex: 900,
                             width: 300,
                             height: 300,
                             transform: `translate(-50%, -50%) rotate(${degree}deg)`,
-
                         }}
-                        onMouseDown={(e) => {
-                            boxMouseDown(e);
-                        }}
-                        onMouseUp={() => {
-                            boxMouseUp();
-                        }}
-                        onClick={() => console.log("fakeWrapper")}
                     >
                         <div class={style.targetLine}>
                             <div
@@ -313,9 +302,22 @@ const Home: FunctionalComponent = () => {
                                 onMouseDown={() => {
                                     setRotate(true);
                                 }}
+                                onClick={() => console.log("targetLine")}
                                 onMouseUp={() => setRotate(false)}
                             />
                         </div>
+                        <div id="dragTest"
+                            style={{
+                                width: "100%",
+                                height: "100%"
+                            }}
+                            onMouseDown={(e) => {
+                                boxMouseDown(e);
+                            }}
+                            onMouseUp={() => {
+                                boxMouseUp();
+                            }}
+                        />
                         <div
                             id="controlBox"
                             class={style.controlBox}
@@ -328,9 +330,7 @@ const Home: FunctionalComponent = () => {
                 <div
                     id="canvas"
                     class={style.canvas}
-                    style={{
-                        overflow: "hidden"
-                    }}
+
                 >
                     <div
                         id="cursorHelper"
@@ -340,11 +340,9 @@ const Home: FunctionalComponent = () => {
                             top: boxPos.top,
                         }}
                     ></div>
-                    <div id="boxWrapper" style={{
-                        border: "1px solid red",
-                        position: "absolute",
-                        transformOrigin: "top left",
-                    }}>
+                    <div id="boxWrapper"
+                        class={style.moveableBoxWrapper}
+                    >
                         <div
                             id="moveableBox"
                             class={style.moveableBox}
@@ -354,8 +352,6 @@ const Home: FunctionalComponent = () => {
                                 transform: `translate(-50%, -50%) rotate(${degree}deg)`,
                                 width: 300,
                                 height: 300,
-                                backgroundColor: "skyblue"
-
                             }}
                         >
                             <div
@@ -367,18 +363,6 @@ const Home: FunctionalComponent = () => {
                                 class={style.uploadImg}
                                 draggable={false}
                                 src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
-                                style={{
-                                    width: "100%",
-                                    height: "100%",
-                                }}
-                                //issue: control active 상태와 이벤트가 겹치니까 오작동한다. 
-                                // onMouseDown={(e) => {
-                                //     boxMouseDown(e);
-                                // }}
-                                // onMouseUp={() => {
-                                //     boxMouseUp();
-                                // }}
-                                onClick={() => console.log("stickerImg")}
                             />
                         </div>
                     </div>
