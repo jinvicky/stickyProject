@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from 'preact';
 import { Route, Router } from 'preact-router';
 
-import Home from '../routes/home/resizeRefactoring/eResize';
+import Home from '../routes/home/activeControl/controlActive';
 
 const App: FunctionalComponent = () => {
     return (

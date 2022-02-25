@@ -1,6 +1,6 @@
 import { createContext, Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
-import style from './eResize.scss';
+import style from './controlActive.scss';
 
 let mousePress = { x: 0, y: 0 };
 let initX = 0;
@@ -82,6 +82,14 @@ const Home: FunctionalComponent = () => {
             const center = {
                 x: rect.left + rect.width / 2,
                 y: rect.top + rect.height / 2,
+            };
+            setCenter(center);
+        }
+        const point = document.getElementById("centerPoint");
+        if (point) {
+            const center = {
+                x: point?.getBoundingClientRect().left + point?.getBoundingClientRect().width,
+                y: point?.getBoundingClientRect().top + point?.getBoundingClientRect().height,
             };
             setCenter(center);
         }
@@ -271,19 +279,16 @@ const Home: FunctionalComponent = () => {
             >
                 <div id="fakeWrapper"
                     style={{
-                        border: "1px solid red",
+                        border: "1px solid yellow",
                         position: "absolute",
                         transformOrigin: "top left",
                     }}
                 >
                     <div
-
                         id="fakeControl"
                         style={{
                             border: "1px solid blue",
-                            background: "skyblue",
                             position: "absolute",
-                            opacity: 0.5,
                             left: tPos.left,
                             top: tPos.top,
                             display: "inline-block",
@@ -293,22 +298,30 @@ const Home: FunctionalComponent = () => {
                             transform: `translate(-50%, -50%) rotate(${degree}deg)`,
 
                         }}
+                        onMouseDown={(e) => {
+                            boxMouseDown(e);
+                        }}
+                        onMouseUp={() => {
+                            boxMouseUp();
+                        }}
                         onClick={() => console.log("fakeWrapper")}
                     >
-
+                        <div class={style.targetLine}>
+                            <div
+                                id="control"
+                                class={style.rotateControl}
+                                onMouseDown={() => {
+                                    setRotate(true);
+                                }}
+                                onMouseUp={() => setRotate(false)}
+                            />
+                        </div>
                         <div
-                            style={{
-                                position: "absolute",
-                                width: 10,
-                                height: 10,
-                                background: "red",
-                                display: "inline-block",
-                                zIndex: 900,
-                                transformOrigin: "top left",
-                                transform: `translate(-50%, -50%)`,
-                            }}
-                            onClick={() => console.log("fakeControl")}
-                        />
+                            id="controlBox"
+                            class={style.controlBox}
+                        >
+                            {controlElems}
+                        </div>
                     </div>
                 </div>
 
@@ -345,36 +358,26 @@ const Home: FunctionalComponent = () => {
 
                             }}
                         >
-                            <div class={style.targetLine}>
-                                <div
-                                    id="control"
-                                    class={style.rotateControl}
-                                    onMouseDown={() => {
-                                        setRotate(true);
-                                    }}
-                                    onMouseUp={() => setRotate(false)}
-                                />
-                            </div>
                             <div
-                                id="controlBox"
-                                class={style.controlBox}
-                            >
-                                {controlElems}
-                            </div>
+                                id="centerPoint"
+                                class={style.centerPoint}
+                            />
                             <img
                                 id="img"
                                 class={style.uploadImg}
                                 draggable={false}
-                                src="https://i.ytimg.com/vi/ei7kbQhK1hA/hq720_live.jpg?sqp=CNyl0ZAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLBIoXPwWpysqzeTnIB-YmLYl13kUw" style={{
+                                src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
+                                style={{
                                     width: "100%",
                                     height: "100%",
                                 }}
-                                onMouseDown={(e) => {
-                                    boxMouseDown(e);
-                                }}
-                                onMouseUp={() => {
-                                    boxMouseUp();
-                                }}
+                                //issue: control active 상태와 이벤트가 겹치니까 오작동한다. 
+                                // onMouseDown={(e) => {
+                                //     boxMouseDown(e);
+                                // }}
+                                // onMouseUp={() => {
+                                //     boxMouseUp();
+                                // }}
                                 onClick={() => console.log("stickerImg")}
                             />
                         </div>
