@@ -36,13 +36,32 @@ const Home: FunctionalComponent = () => {
 
     const [boxPos, setBoxPos] = useState({ top: 200, left: 200 });
 
-    const boxMouseDown = (e: any) => {
+    useEffect(() => {
+        console.log("mounted");
+        window.addEventListener("click", checkETarget);
+        return () => {
+
+            window.removeEventListener("click", checkETarget);
+            console.log("unmounted");
+        }
+    }, []);
+
+
+    const checkETarget = useCallback((e: MouseEvent) => {
+
+        console.log("window의 clickEvt의 타겟", (e.target as HTMLElement).id);
+
+        if ((e.target as HTMLElement).id !== "draggableSpace")
+            setCActive(false);
+    }, []);
+
+    const boxMouseDown = useCallback((e: MouseEvent) => {
         setDrag(true);
         setImgOffset(e);
 
         window.addEventListener("mousemove", movePosOfBox);
         window.addEventListener("mouseup", boxMouseUp);
-    };
+    }, []);
 
     const movePosOfBox = useCallback((e: MouseEvent) => {
 
@@ -57,7 +76,7 @@ const Home: FunctionalComponent = () => {
         }
     }, []);
 
-    const boxMouseUp = (e: MouseEvent) => {
+    const boxMouseUp = useCallback((e: MouseEvent) => {
         e.stopPropagation();
         setDrag(false);
         setCenterOfBox();
@@ -65,7 +84,7 @@ const Home: FunctionalComponent = () => {
 
         window.removeEventListener("mousemove", movePosOfBox);
         window.removeEventListener("mouseup", boxMouseUp);
-    };
+    }, []);
 
     const [cActive, setCActive] = useState(false);
 
