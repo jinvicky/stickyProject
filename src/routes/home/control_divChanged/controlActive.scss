@@ -7,44 +7,24 @@ $primary: #4af;
 	position: relative;
 	background-color: #ddd;
 
+	display: flex;
+
 	.moveableSpace {
-		width: 100%;
-		height: 900px;
-		margin-left: auto;
+		margin: auto;
 		position: relative;
-		background-color: rgb(150, 150, 187);
 
 		.canvas {
 			overflow: hidden;
-			width: 966px;
-			height: 600px;
+			width: 1000px;
+			height: 562px;
 			margin: 0 auto;
 			position: relative;
-			top: 200px;
 			background-color: #135581;
 		}
 		.cursorHelper {
 			position: absolute;
 			border: 1px solid #ccc;
 			visibility: hidden;
-		}
-		.imageBtn {
-			padding: 15px 20px;
-			position: absolute;
-			top: 90px;
-			left: 45%;
-			border: 1px solid purple;
-			color: purple;
-			font-weight: bold;
-			font-size: 20px;
-			border-radius: 10px;
-			cursor: pointer;
-			user-select: none;
-
-			&.active {
-				background-color: purple;
-				color: white;
-			}
 		}
 
 		.moveableBox {
@@ -54,7 +34,6 @@ $primary: #4af;
 			align-items: center;
 			user-select: none;
 			cursor: move;
-			// visibility: hidden;
 
 			> .centerPoint {
 				width: 10px;
@@ -70,13 +49,33 @@ $primary: #4af;
 		}
 		.uploadImg {
 			display: block;
-			width: 100%;
-			height: 100%;
 			user-select: none;
 			-webkit-user-drag: none;
 			-webkit-user-select: none;
+			width: auto;
+			height: auto;
+			max-width: 500px;
+			max-height: 270px;
 		}
 	} // end of .moveSP
+}
+.imageBtn {
+	padding: 15px 20px;
+	position: absolute;
+	top: 90px;
+	left: 45%;
+	border: 1px solid purple;
+	color: purple;
+	font-weight: bold;
+	font-size: 20px;
+	border-radius: 10px;
+	cursor: pointer;
+	user-select: none;
+
+	&.active {
+		background-color: purple;
+		color: white;
+	}
 }
 
 .controllerBoxWrapper {
