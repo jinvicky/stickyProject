@@ -3,206 +3,166 @@ $primary: #4af;
 .root {
 	min-width: 1320px;
 	max-width: 1920px;
-	height: 1500px;
+	height: 1000px;
 	position: relative;
+	display: flex;
 	background-color: #ddd;
 
-	display: flex;
-
-	.moveableSpace {
+	.screen {
 		margin: auto;
 		position: relative;
 
 		.canvas {
-			overflow: hidden;
 			width: 1000px;
 			height: 562px;
-			margin: 0 auto;
 			position: relative;
 			background-color: #135581;
+			overflow: hidden;
 		}
 		.cursorHelper {
 			position: absolute;
-			border: 1px solid #ccc;
-			visibility: hidden;
 		}
 
-		.moveableBox {
+		.moveableBoxWrapper {
 			position: absolute;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			user-select: none;
-			cursor: move;
+			transform-origin: "top left";
 
-			> .centerPoint {
-				width: 10px;
-				height: 10px;
+			.stickerBox {
+				z-index: 999;
+				overflow: hidden;
+				border: 1px solid rgb(214, 120, 120);
+
 				position: absolute;
-				left: calc(50% - 5px);
-				top: calc(50% - 5px);
-				border: 1px solid white;
-				border-radius: 50%;
-				background-color: red;
-				visibility: hidden;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				user-select: none;
+				cursor: move;
+
+				.sticker {
+					display: block;
+					user-select: none;
+					-webkit-user-drag: none;
+					-webkit-user-select: none;
+
+					width: 100%;
+					height: 100%;
+				}
 			}
 		}
-		.uploadImg {
-			display: block;
-			user-select: none;
-			-webkit-user-drag: none;
-			-webkit-user-select: none;
-			width: auto;
-			height: auto;
-			max-width: 500px;
-			max-height: 270px;
-		}
-	} // end of .moveSP
-}
-.imageBtn {
-	padding: 15px 20px;
-	position: absolute;
-	top: 90px;
-	left: 45%;
-	border: 1px solid purple;
-	color: purple;
-	font-weight: bold;
-	font-size: 20px;
-	border-radius: 10px;
-	cursor: pointer;
-	user-select: none;
-
-	&.active {
-		background-color: purple;
-		color: white;
 	}
-}
-
-.controllerBoxWrapper {
-	position: absolute;
-	transform-origin: top left;
-
-	> .controllerBox {
-		border: 1px solid blue;
+	.uploadBtn {
 		position: absolute;
-		// display: none;
-		z-index: 100;
+		top: 90px;
+		left: 45%;
+	}
 
-		> .targetLine {
-			width: 1px;
-			height: 35px;
+	.controllerBoxWrapper {
+		position: absolute;
+		transform-origin: top left;
+
+		> .controllerBox {
+			border: 1px solid blue;
 			position: absolute;
-			top: -35px;
-			background-color: $primary;
-			left: 50%;
-			transform: translate(-50%, 0);
+			z-index: 100;
 
-			> .rotateControl {
-				width: 15px;
-				height: 15px;
-				position: relative;
-				top: -10px;
+			> .targetLine {
+				width: 1px;
+				height: 35px;
+				position: absolute;
+				top: -35px;
+				background-color: $primary;
 				left: 50%;
 				transform: translate(-50%, 0);
-				border: 2px solid $primary;
-				border-radius: 50%;
-				background-color: rgb(184, 27, 100);
+
+				> .rotateControl {
+					width: 15px;
+					height: 15px;
+					position: relative;
+					top: -10px;
+					left: 50%;
+					transform: translate(-50%, 0);
+					border: 2px solid $primary;
+					border-radius: 50%;
+					background-color: rgb(184, 27, 100);
+				}
+			}
+
+			> .draggableSpace {
+				width: 100%;
+				height: 100%;
 			}
 		}
+	}
 
-		> .draggableSpace {
-			width: 100%;
-			height: 100%;
+	//controlBox 분리
+	.controlBox {
+		z-index: 90;
+
+		.resizeControl {
+			width: 15px;
+			height: 15px;
+			position: absolute;
+			border: 2px solid $primary;
+			border-radius: 50%;
+			background-color: rgb(255, 255, 255);
 		}
-	}
-}
 
-.moveableBoxWrapper {
-	position: absolute;
-	transform-origin: "top left";
-
-	> .moveableBox {
-	}
-}
-
-//controlBox 분리
-.controlBox {
-	z-index: 90;
-
-	.resizeControl {
-		width: 15px;
-		height: 15px;
-		position: absolute;
-		border: 2px solid $primary;
-		border-radius: 50%;
-		background-color: rgb(255, 255, 255);
-	}
-
-	.resizeControl[data-id="e"] {
-		right: 0;
-		top: 50%;
-		transform: translateY(-50%);
-		margin-right: -8px;
-		cursor: e-resize;
-	}
-	.resizeControl[data-id="w"] {
-		margin-left: -8px;
-		top: 50%;
-		left: 0;
-		transform: translateY(-50%);
-		cursor: w-resize;
-	}
-	.resizeControl[data-id="nw"] {
-		top: 0;
-		left: 0;
-		margin-left: -8px;
-		margin-top: -8px;
-		cursor: nw-resize;
-	}
-	.resizeControl[data-id="n"] {
-		top: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-top: -8px;
-		cursor: n-resize;
-	}
-	.resizeControl[data-id="ne"] {
-		right: 0;
-		top: 0;
-		margin-right: -8px;
-		margin-top: -8px;
-		cursor: ne-resize;
-	}
-	.resizeControl[data-id="sw"] {
-		cursor: sw-resize;
-		left: 0;
-		bottom: 0;
-		margin-left: -8px;
-		margin-bottom: -8px;
-	}
-	.resizeControl[data-id="s"] {
-		bottom: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-bottom: -8px;
-		cursor: s-resize;
-	}
-	.resizeControl[data-id="se"] {
-		cursor: se-resize;
-		right: 0;
-		bottom: 0;
-		margin-right: -8px;
-		margin-bottom: -8px;
-	}
-}
-//upload
-.backImage {
-	width: 100%;
-	height: 100%;
-
-	> .uploadImg {
-		display: block;
-		width: 100%;
-		height: 100%;
+		.resizeControl[data-id="e"] {
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			margin-right: -8px;
+			cursor: e-resize;
+		}
+		.resizeControl[data-id="w"] {
+			margin-left: -8px;
+			top: 50%;
+			left: 0;
+			transform: translateY(-50%);
+			cursor: w-resize;
+		}
+		.resizeControl[data-id="nw"] {
+			top: 0;
+			left: 0;
+			margin-left: -8px;
+			margin-top: -8px;
+			cursor: nw-resize;
+		}
+		.resizeControl[data-id="n"] {
+			top: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			margin-top: -8px;
+			cursor: n-resize;
+		}
+		.resizeControl[data-id="ne"] {
+			right: 0;
+			top: 0;
+			margin-right: -8px;
+			margin-top: -8px;
+			cursor: ne-resize;
+		}
+		.resizeControl[data-id="sw"] {
+			cursor: sw-resize;
+			left: 0;
+			bottom: 0;
+			margin-left: -8px;
+			margin-bottom: -8px;
+		}
+		.resizeControl[data-id="s"] {
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			margin-bottom: -8px;
+			cursor: s-resize;
+		}
+		.resizeControl[data-id="se"] {
+			cursor: se-resize;
+			right: 0;
+			bottom: 0;
+			margin-right: -8px;
+			margin-bottom: -8px;
+		}
 	}
 }
