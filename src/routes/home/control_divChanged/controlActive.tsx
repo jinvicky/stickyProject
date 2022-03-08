@@ -28,36 +28,43 @@ let imgOffset = { x: 0, y: 0 };
 const Home: FunctionalComponent = () => {
 
     const [file, setFile] = useState("");
-    const saveFileImg = (files: FileList) => files && setFile(URL.createObjectURL(files[0]));
 
-    const [drag, setDrag] = useState(false);
+    const saveFileImg = (e: h.JSX.TargetedEvent<HTMLInputElement>) => {
+        const target = e.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) setFile(URL.createObjectURL(target.files[0]));
+    }
+
     const [boxPos, setBoxPos] = useState({ top: 200, left: 200 });
 
     useEffect(() => {
-        console.log("mounted");
-        setCenterOfBox();
-        window.addEventListener("click", checkETarget);
+        window.addEventListener("mousedown", checkCursorPosition);
         return () => {
-            window.removeEventListener("click", checkETarget);
-            console.log("unmounted");
+            window.removeEventListener("mousedown", checkCursorPosition);
         }
     }, []);
 
+    const [cActive, setCActive] = useState(false);
+
     useEffect(() => {
+        setCenterOfBox();
         setBoxPos({ left: 100, top: 100 });
     }, [file]);
 
+    const checkCursorPosition = useCallback((e: MouseEvent) => {
+        const tg = e.target as HTMLElement;
+        const ControllerBox = document.getElementById("controllerBox");
 
-    const checkETarget = useCallback((e: MouseEvent) => {
-
+        if (ControllerBox)
+            if (!cActive && !ControllerBox.contains(tg))
+                setCActive(false);
     }, []);
 
-    const boxMouseDown = useCallback((e: MouseEvent) => {
-        setDrag(true);
+    const dragStart = useCallback((e: MouseEvent) => {
+        e.preventDefault();
         setImgOffset(e);
 
         window.addEventListener("mousemove", movePosOfBox);
-        window.addEventListener("mouseup", boxMouseUp);
+        window.addEventListener("mouseup", dragEnd);
     }, []);
 
     const movePosOfBox = useCallback((e: MouseEvent) => {
@@ -72,19 +79,16 @@ const Home: FunctionalComponent = () => {
         }
     }, []);
 
-    const boxMouseUp = useCallback((e: MouseEvent) => {
+    const dragEnd = useCallback((e: MouseEvent) => {
         e.stopPropagation();
-        setDrag(false);
         setCenterOfBox();
 
         window.removeEventListener("mousemove", movePosOfBox);
-        window.removeEventListener("mouseup", boxMouseUp);
+        window.removeEventListener("mouseup", dragEnd);
     }, []);
 
-    const [cActive, setCActive] = useState(false);
-
     const setImgOffset = (e: MouseEvent) => {
-        const i = document.getElementById("cursorHelper");
+        const i = document.getElementById("cursorPos");
         if (i) {
             const img = i?.getBoundingClientRect();
             imgOffset.x = Math.round(e.clientX - img.left);
@@ -92,7 +96,6 @@ const Home: FunctionalComponent = () => {
         }
     }
 
-    const [rotate, setRotate] = useState(false);
     const [degree, setDegree] = useState(0);
     const [center, setCenter] = useState({ x: 0, y: 0 });
 
@@ -108,27 +111,40 @@ const Home: FunctionalComponent = () => {
         }
     };
 
-    const rotateBox = (e: MouseEvent) => {
+    const rotateStart = (e: MouseEvent) => {
+        e.preventDefault();
+        window.addEventListener("mousemove", rotateSticker);
+        window.addEventListener("mouseup", rotateEnd);
+    };
+
+    const rotateSticker = (e: MouseEvent) => {
         const x = e.clientX - center.x;
         const y = e.clientY - center.y;
         const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
-        rotate && setDegree(Math.round(degree));
+        setDegree(Math.round(degree));
     };
 
-    const [resize, setResize] = useState(false);
+    const rotateEnd = () => {
+        window.removeEventListener("mousemove", rotateSticker);
+        window.removeEventListener("mouseup", rotateEnd);
+    };
 
     const checkDirection = (direction: string) => {
+
         if (direction === "e" || direction === "w") dir = "width";
         else if (direction === "s" || direction === "n") dir = "height";
         else dir = "edge";
     };
 
     const checkNW = (direction: string) => {
+
         if (direction.indexOf("n") > -1) rh = -1;
         if (direction.indexOf("w") > -1) rw = -1;
     };
 
-    const controllerSetting = (e: MouseEvent) => {
+    const resizeStart = (e: MouseEvent) => {
+
+        e.preventDefault();
         const direction = (e.currentTarget as Element).getAttribute("data-id");
 
         if (direction) {
@@ -142,17 +158,17 @@ const Home: FunctionalComponent = () => {
         if (box) {
             initW = box.offsetWidth;
             initH = box.offsetHeight;
-
             initX = box.offsetLeft;
             initY = box.offsetTop;
-
             initRotate = degree;
         }
-        setResize(true);
+        window.addEventListener("mousemove", resizeSticker);
+        window.addEventListener("mouseup", resizeEnd);
     };
 
     //resize 종료 시 rx, rw, rh 값을 초기화. ry는 1로 변하지 않더라.
     const resetRVariable = () => {
+
         rx = 1;
         rw = 1;
         rh = 1;
@@ -202,7 +218,7 @@ const Home: FunctionalComponent = () => {
     const cosFraction = Math.cos(initRad);
     const sinFraction = Math.sin(initRad);
 
-    const resizeBox = (e: MouseEvent) => {
+    const resizeSticker = (e: MouseEvent) => {
         const b = document.getElementById("moveableBox");
 
         let wDiff = e.clientX - mousePress.x;
@@ -216,29 +232,32 @@ const Home: FunctionalComponent = () => {
         newX = initX;
         newY = initY;
 
-
-        if (resize) {
-            switch (dir) {
-                case "width":
-                    calculateNewX(rotatedWDiff);
-                    break;
-                case "height":
-                    calculateNewY(rotatedHDiff);
-                    break;
-                case "edge":
-                    calculateEdge(rotatedWDiff, rotatedHDiff);
-            }
-            if (b) repositBox(b);
+        switch (dir) {
+            case "width":
+                calculateNewX(rotatedWDiff);
+                break;
+            case "height":
+                calculateNewY(rotatedHDiff);
+                break;
+            case "edge":
+                calculateEdge(rotatedWDiff, rotatedHDiff);
         }
+        if (b) repositBox(b);
+    };
+
+    const resizeEnd = () => {
+        resetRVariable();
+        window.removeEventListener("mousemove", resizeSticker);
+        window.removeEventListener("mouseup", resizeEnd);
     };
 
     const controlArray = ["e", "w", "s", "n", "se", "ne", "sw", "nw"];
 
-    const controlElems = controlArray.map((direction2, idx) => {
-        return <div key={idx}
+    const controlElems = controlArray.map((dir, idx) => {
+        return <div key={`control-${idx}`}
             class={style.resizeControl}
-            data-id={`${direction2}`}
-            onMouseDown={(e) => controllerSetting(e)}
+            data-id={`${dir}`}
+            onMouseDown={(e) => resizeStart(e)}
         />;
     });
 
@@ -270,30 +289,12 @@ const Home: FunctionalComponent = () => {
         }
     };
 
-    return <Fragment>
-        <div class={style.root}
-            id="moveableSpace"
-            onMouseMove={(e) => {
-                if (drag) {
-                    movePosOfBox(e);
-                }
-                resizeBox(e);
-                rotateBox(e);
-            }}
-            onMouseUp={() => {
-                resetRVariable();
-                setResize(false);
-                setRotate(false);
-                setDrag(false);
-            }}
-        >
-            <div
-                class={style.screen}
-            >
-                <div
-                    id="fakeWrapper"
-                    class={style.controllerBoxWrapper}
-                >
+    return <>
+        <div class={style.root}>
+            <div class={style.screen}>
+                {/* TODO:: controller active  */}
+                {/* <div class={style.controlScreen} /> */}
+                <div class={style.controllerBoxWrapper}>
                     <div
                         id="controllerBox"
                         class={style.controllerBox}
@@ -301,57 +302,38 @@ const Home: FunctionalComponent = () => {
                             left: boxPos.left,
                             top: boxPos.top,
                             transform: `translate(-50%, -50%) rotate(${degree}deg)`,
-                            // display: cActive === true ? "block" : "none",
-                            // display: block,
+                            display: cActive ? "block" : "none"
                         }}
                     >
                         <div class={style.targetLine}>
                             <div
-                                id="control"
                                 class={style.rotateControl}
-                                onMouseDown={() => {
-                                    setRotate(true);
-                                }}
-                                onMouseUp={() => setRotate(false)}
+                                onMouseDown={(e) => rotateStart(e)}
                             />
                         </div>
-                        <div id="draggableSpace"
-                            class={style.draggableSpace}
-                            onMouseDown={(e) => {
-                                boxMouseDown(e);
-                            }}
-                            onMouseUp={(e) => {
-                                boxMouseUp(e);
-                            }}
-                        />
                         <div
-                            id="controlBox"
-                            class={style.controlBox}
-                        >
+                            class={style.draggableSpace}
+                            onMouseDown={(e) => dragStart(e)}
+                        />
+                        <div class={style.controlBox}>
                             {controlElems}
                         </div>
                     </div>
                 </div>
-
                 <div
                     id="canvas"
                     class={style.canvas}
-                    onClick={() => {
-                        if (cActive) setCActive(!cActive);
-                    }}
                 >
                     {file && <>
                         <div
-                            id="cursorHelper"
+                            id="cursorPos"
                             class={style.cursorHelper}
                             style={{
                                 left: boxPos.left,
                                 top: boxPos.top,
                             }}
                         />
-                        <div id="boxWrapper"
-                            class={style.moveableBoxWrapper}
-                        >
+                        <div class={style.moveableBoxWrapper}>
                             <div
                                 id="moveableBox"
                                 class={style.stickerBox}
@@ -360,44 +342,33 @@ const Home: FunctionalComponent = () => {
                                     top: boxPos.top,
                                     transform: `translate(-50%, -50%) rotate(${degree}deg)`,
                                 }}
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    if (!cActive) dragStart(e);
+                                }}
+                                onClick={() => setCActive(true)}
                             >
                                 <img
-                                    id="img"
                                     class={style.sticker}
-                                    draggable={false}
                                     // src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
                                     src={file}
-                                    onLoad={(e) => setStickerRatio(e)}
-                                    onMouseDown={(e) => {
-                                        if (!cActive) boxMouseDown(e)
-                                    }}
-                                    onMouseUp={(e) => {
-                                        if (!cActive) {
-                                            boxMouseUp(e);
-                                            // setCActive(true);
-                                        }
-                                    }}
-                                    onClick={(e) => {
-                                        e.stopPropagation(); //canvas 방지
-                                        // setCActive(true);
+                                    onLoad={(e) => {
+                                        setStickerRatio(e);
+                                        setCActive(true);
                                     }}
                                 />
                             </div>
                         </div>
-                    </>
-                    }
+                    </>}
                 </div>
             </div>
-            <input type="file"
-                id="upload"
+            <input
+                type="file"
                 class={style.uploadBtn}
-                onInput={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    if (target.files && target.files.length > 0) saveFileImg(target.files);
-                }}
+                onInput={(e) => saveFileImg(e)}
             />
         </div >
-    </Fragment >
+    </>
 };
 
 export default Home;

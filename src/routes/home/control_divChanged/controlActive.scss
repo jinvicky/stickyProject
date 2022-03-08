@@ -28,10 +28,7 @@ $primary: #4af;
 			transform-origin: "top left";
 
 			.stickerBox {
-				z-index: 999;
 				overflow: hidden;
-				border: 1px solid rgb(214, 120, 120);
-
 				position: absolute;
 				display: flex;
 				flex-direction: column;
@@ -41,12 +38,13 @@ $primary: #4af;
 
 				.sticker {
 					display: block;
-					user-select: none;
-					-webkit-user-drag: none;
-					-webkit-user-select: none;
 
 					width: 100%;
 					height: 100%;
+				}
+
+				&:hover {
+					cursor: move;
 				}
 			}
 		}
@@ -65,22 +63,28 @@ $primary: #4af;
 			border: 1px solid blue;
 			position: absolute;
 			z-index: 100;
+			cursor: move;
+
+			&:hover {
+				cursor: move;
+			}
 
 			> .targetLine {
 				width: 1px;
 				height: 35px;
 				position: absolute;
-				top: -35px;
-				background-color: $primary;
 				left: 50%;
+				top: -35px;
 				transform: translate(-50%, 0);
+				background-color: $primary;
+				cursor: n-resize;
 
 				> .rotateControl {
 					width: 15px;
 					height: 15px;
 					position: relative;
-					top: -10px;
 					left: 50%;
+					top: -10px;
 					transform: translate(-50%, 0);
 					border: 2px solid $primary;
 					border-radius: 50%;
@@ -92,77 +96,74 @@ $primary: #4af;
 				width: 100%;
 				height: 100%;
 			}
-		}
-	}
 
-	//controlBox 분리
-	.controlBox {
-		z-index: 90;
+			> .controlBox {
+				.resizeControl {
+					width: 15px;
+					height: 15px;
+					position: absolute;
+					border: 2px solid $primary;
+					border-radius: 50%;
+					background-color: rgb(255, 255, 255);
+				}
 
-		.resizeControl {
-			width: 15px;
-			height: 15px;
-			position: absolute;
-			border: 2px solid $primary;
-			border-radius: 50%;
-			background-color: rgb(255, 255, 255);
-		}
-
-		.resizeControl[data-id="e"] {
-			right: 0;
-			top: 50%;
-			transform: translateY(-50%);
-			margin-right: -8px;
-			cursor: e-resize;
-		}
-		.resizeControl[data-id="w"] {
-			margin-left: -8px;
-			top: 50%;
-			left: 0;
-			transform: translateY(-50%);
-			cursor: w-resize;
-		}
-		.resizeControl[data-id="nw"] {
-			top: 0;
-			left: 0;
-			margin-left: -8px;
-			margin-top: -8px;
-			cursor: nw-resize;
-		}
-		.resizeControl[data-id="n"] {
-			top: 0;
-			left: 50%;
-			transform: translateX(-50%);
-			margin-top: -8px;
-			cursor: n-resize;
-		}
-		.resizeControl[data-id="ne"] {
-			right: 0;
-			top: 0;
-			margin-right: -8px;
-			margin-top: -8px;
-			cursor: ne-resize;
-		}
-		.resizeControl[data-id="sw"] {
-			cursor: sw-resize;
-			left: 0;
-			bottom: 0;
-			margin-left: -8px;
-			margin-bottom: -8px;
-		}
-		.resizeControl[data-id="s"] {
-			bottom: 0;
-			left: 50%;
-			transform: translateX(-50%);
-			margin-bottom: -8px;
-			cursor: s-resize;
-		}
-		.resizeControl[data-id="se"] {
-			cursor: se-resize;
-			right: 0;
-			bottom: 0;
-			margin-right: -8px;
-			margin-bottom: -8px;
+				.resizeControl[data-id="e"] {
+					right: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					margin-right: -8px;
+					cursor: e-resize;
+				}
+				.resizeControl[data-id="w"] {
+					margin-left: -8px;
+					top: 50%;
+					left: 0;
+					transform: translateY(-50%);
+					cursor: w-resize;
+				}
+				.resizeControl[data-id="nw"] {
+					top: 0;
+					left: 0;
+					margin-left: -8px;
+					margin-top: -8px;
+					cursor: nw-resize;
+				}
+				.resizeControl[data-id="n"] {
+					top: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					margin-top: -8px;
+					cursor: n-resize;
+				}
+				.resizeControl[data-id="ne"] {
+					right: 0;
+					top: 0;
+					margin-right: -8px;
+					margin-top: -8px;
+					cursor: ne-resize;
+				}
+				.resizeControl[data-id="sw"] {
+					cursor: sw-resize;
+					left: 0;
+					bottom: 0;
+					margin-left: -8px;
+					margin-bottom: -8px;
+				}
+				.resizeControl[data-id="s"] {
+					bottom: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					margin-bottom: -8px;
+					cursor: s-resize;
+				}
+				.resizeControl[data-id="se"] {
+					cursor: se-resize;
+					right: 0;
+					bottom: 0;
+					margin-right: -8px;
+					margin-bottom: -8px;
+				}
+			}
 		}
 	}
 }
