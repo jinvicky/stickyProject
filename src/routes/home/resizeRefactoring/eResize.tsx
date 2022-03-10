@@ -1,4 +1,4 @@
-import { createContext, Fragment, FunctionalComponent, h } from 'preact';
+import { Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './eResize.scss';
 
@@ -20,7 +20,6 @@ let ry = 1;
 let rw = 1;
 let rh = 1;
 
-
 //resize할 때 방향을 정의합니다. 
 let dir = "";
 
@@ -28,11 +27,7 @@ let imgOffset = { x: 0, y: 0 };
 
 const Home: FunctionalComponent = () => {
 
-
     const [drag, setDrag] = useState(false);
-
-    const [tPos, setTPos] = useState({ left: 200, top: 200 });
-
     const [boxPos, setBoxPos] = useState({ top: 200, left: 200 });
 
     //DESC:: .boxWrapper를 mousedown할 때 실행하는 함수. 
@@ -61,7 +56,6 @@ const Home: FunctionalComponent = () => {
             let y = e.clientY - elRect.top - imgOffset.y;
 
             setBoxPos({ left: x, top: y });
-            setTPos({ left: e.clientX - imgOffset.x, top: e.clientY - imgOffset.y });
         }
     }, []);
 
@@ -97,9 +91,6 @@ const Home: FunctionalComponent = () => {
         const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
         rotate && setDegree(Math.round(degree));
     };
-
-    //DESC:: control mousedown시 시작하는 e.clientX,Y 저장
-    const [resize, setResize] = useState({ direction: "", state: false });
 
     const [controller, setController] = useState(false);
 
@@ -142,6 +133,8 @@ const Home: FunctionalComponent = () => {
             initY = box.offsetTop;
 
             initRotate = degree;
+
+
         }
         setController(true);
     };
@@ -184,23 +177,7 @@ const Home: FunctionalComponent = () => {
         b.style.width = newW + "px";
         b.style.height = newH + "px";
 
-
-        //테스트 삼아서 #fakeControl의 width, height도 같이 변경해본다. 
-        const f = document.getElementById("fakeControl");
-        if (f) {
-            f.style.width = newW + "px";
-            f.style.height = newH + "px";
-        }
-
-
-
         setBoxPos({ left: newX, top: newY });
-
-        const canvas = document.getElementById("canvas");
-        if (canvas) {
-            const vasRect = canvas.getBoundingClientRect();
-            setTPos({ left: newX + vasRect.left, top: newY + vasRect.top });
-        }
         setCenterOfBox();
     };
 
@@ -271,47 +248,11 @@ const Home: FunctionalComponent = () => {
             >
                 <div id="fakeWrapper"
                     style={{
-                        border: "1px solid red",
                         position: "absolute",
                         transformOrigin: "top left",
                     }}
                 >
-                    <div
-
-                        id="fakeControl"
-                        style={{
-                            border: "1px solid blue",
-                            background: "skyblue",
-                            position: "absolute",
-                            opacity: 0.5,
-                            left: tPos.left,
-                            top: tPos.top,
-                            display: "inline-block",
-                            zIndex: 900,
-                            width: 300,
-                            height: 300,
-                            transform: `translate(-50%, -50%) rotate(${degree}deg)`,
-
-                        }}
-                        onClick={() => console.log("fakeWrapper")}
-                    >
-
-                        <div
-                            style={{
-                                position: "absolute",
-                                width: 10,
-                                height: 10,
-                                background: "red",
-                                display: "inline-block",
-                                zIndex: 900,
-                                transformOrigin: "top left",
-                                transform: `translate(-50%, -50%)`,
-                            }}
-                            onClick={() => console.log("fakeControl")}
-                        />
-                    </div>
                 </div>
-
                 <div
                     id="canvas"
                     class={style.canvas}

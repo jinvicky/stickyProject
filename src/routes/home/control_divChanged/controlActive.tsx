@@ -34,9 +34,10 @@ const Home: FunctionalComponent = () => {
         if (target.files && target.files.length > 0) setFile(URL.createObjectURL(target.files[0]));
     }
 
-    const [boxPos, setBoxPos] = useState({ top: 200, left: 200 });
+    const [boxPos, setBoxPos] = useState({ top: 500, left: 500 });
 
     useEffect(() => {
+        setCenterOfBox();
         window.addEventListener("mousedown", checkCursorPosition);
         return () => {
             window.removeEventListener("mousedown", checkCursorPosition);
@@ -47,7 +48,7 @@ const Home: FunctionalComponent = () => {
 
     useEffect(() => {
         setCenterOfBox();
-        setBoxPos({ left: 100, top: 100 });
+        setBoxPos({ left: 500, top: 500 });
     }, [file]);
 
     const checkCursorPosition = useCallback((e: MouseEvent) => {
@@ -122,6 +123,7 @@ const Home: FunctionalComponent = () => {
         const y = e.clientY - center.y;
         const degree = (((Math.atan2(x, y) * 180 / Math.PI) * -1) + 180);
         setDegree(Math.round(degree));
+        initRotate = Math.round(degree);
     };
 
     const rotateEnd = () => {
@@ -160,7 +162,6 @@ const Home: FunctionalComponent = () => {
             initH = box.offsetHeight;
             initX = box.offsetLeft;
             initY = box.offsetTop;
-            initRotate = degree;
         }
         window.addEventListener("mousemove", resizeSticker);
         window.addEventListener("mouseup", resizeEnd);
@@ -324,42 +325,42 @@ const Home: FunctionalComponent = () => {
                     id="canvas"
                     class={style.canvas}
                 >
-                    {file && <>
+                    {/* {file && <> */}
+                    <div
+                        id="cursorPos"
+                        class={style.cursorHelper}
+                        style={{
+                            left: boxPos.left,
+                            top: boxPos.top,
+                        }}
+                    />
+                    <div class={style.moveableBoxWrapper}>
                         <div
-                            id="cursorPos"
-                            class={style.cursorHelper}
+                            id="moveableBox"
+                            class={style.stickerBox}
                             style={{
                                 left: boxPos.left,
                                 top: boxPos.top,
+                                transform: `translate(-50%, -50%) rotate(${degree}deg)`,
                             }}
-                        />
-                        <div class={style.moveableBoxWrapper}>
-                            <div
-                                id="moveableBox"
-                                class={style.stickerBox}
-                                style={{
-                                    left: boxPos.left,
-                                    top: boxPos.top,
-                                    transform: `translate(-50%, -50%) rotate(${degree}deg)`,
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                if (!cActive) dragStart(e);
+                            }}
+                            onClick={() => setCActive(true)}
+                        >
+                            <img
+                                class={style.sticker}
+                                src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
+                                // src={file}
+                                onLoad={(e) => {
+                                    setStickerRatio(e);
+                                    setCActive(true);
                                 }}
-                                onMouseDown={(e) => {
-                                    e.preventDefault();
-                                    if (!cActive) dragStart(e);
-                                }}
-                                onClick={() => setCActive(true)}
-                            >
-                                <img
-                                    class={style.sticker}
-                                    // src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
-                                    src={file}
-                                    onLoad={(e) => {
-                                        setStickerRatio(e);
-                                        setCActive(true);
-                                    }}
-                                />
-                            </div>
+                            />
                         </div>
-                    </>}
+                    </div>
+                    {/* </>} */}
                 </div>
             </div>
             <input
