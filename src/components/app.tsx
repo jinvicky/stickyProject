@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from 'preact';
 import { Route, Router } from 'preact-router';
 
-import Home from '../routes/home/control_divChanged/controlActive';
+import Home from '../routes/home/flipSticker1/flipSticker';
 
 const App: FunctionalComponent = () => {
     return (

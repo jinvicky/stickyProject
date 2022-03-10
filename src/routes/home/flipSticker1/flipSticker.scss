@@ -1,0 +1,169 @@
+$primary: #4af;
+
+.root {
+	min-width: 1320px;
+	max-width: 1920px;
+	height: 1000px;
+	position: relative;
+	display: flex;
+	background-color: #ddd;
+
+	.screen {
+		margin: auto;
+		position: relative;
+
+		.canvas {
+			width: 1000px;
+			height: 562px;
+			position: relative;
+			background-color: #135581;
+			overflow: hidden;
+		}
+		.cursorHelper {
+			position: absolute;
+		}
+
+		.moveableBoxWrapper {
+			position: absolute;
+			transform-origin: top left;
+
+			.stickerBox {
+				overflow: hidden;
+				position: absolute;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				user-select: none;
+				cursor: move;
+
+				.sticker {
+					display: block;
+
+					width: 100%;
+					height: 100%;
+				}
+
+				&:hover {
+					cursor: move;
+				}
+			}
+		}
+	}
+	.uploadBtn {
+		position: absolute;
+		top: 90px;
+		left: 45%;
+	}
+
+	.controllerBoxWrapper {
+		position: absolute;
+		transform-origin: top left;
+
+		> .controllerBox {
+			border: 1px solid blue;
+			position: absolute;
+			z-index: 100;
+			cursor: move;
+
+			&:hover {
+				cursor: move;
+			}
+
+			> .targetLine {
+				width: 1px;
+				height: 35px;
+				position: absolute;
+				left: 50%;
+				top: -35px;
+				transform: translate(-50%, 0);
+				background-color: $primary;
+				cursor: n-resize;
+
+				> .rotateControl {
+					width: 15px;
+					height: 15px;
+					position: relative;
+					left: 50%;
+					top: -10px;
+					transform: translate(-50%, 0);
+					border: 2px solid $primary;
+					border-radius: 50%;
+					background-color: rgb(184, 27, 100);
+				}
+			}
+
+			> .draggableSpace {
+				width: 100%;
+				height: 100%;
+			}
+
+			> .controlBox {
+				.resizeControl {
+					width: 15px;
+					height: 15px;
+					position: absolute;
+					border: 2px solid $primary;
+					border-radius: 50%;
+					background-color: rgb(255, 255, 255);
+				}
+
+				.resizeControl[data-id="e"] {
+					right: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					margin-right: -8px;
+					cursor: e-resize;
+				}
+				.resizeControl[data-id="w"] {
+					margin-left: -8px;
+					top: 50%;
+					left: 0;
+					transform: translateY(-50%);
+					cursor: w-resize;
+				}
+				.resizeControl[data-id="nw"] {
+					top: 0;
+					left: 0;
+					margin-left: -8px;
+					margin-top: -8px;
+					cursor: nw-resize;
+				}
+				.resizeControl[data-id="n"] {
+					top: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					margin-top: -8px;
+					cursor: n-resize;
+				}
+				.resizeControl[data-id="ne"] {
+					right: 0;
+					top: 0;
+					margin-right: -8px;
+					margin-top: -8px;
+					cursor: ne-resize;
+				}
+				.resizeControl[data-id="sw"] {
+					cursor: sw-resize;
+					left: 0;
+					bottom: 0;
+					margin-left: -8px;
+					margin-bottom: -8px;
+				}
+				.resizeControl[data-id="s"] {
+					bottom: 0;
+					left: 50%;
+					transform: translateX(-50%);
+					margin-bottom: -8px;
+					cursor: s-resize;
+				}
+				.resizeControl[data-id="se"] {
+					cursor: se-resize;
+					right: 0;
+					bottom: 0;
+					margin-right: -8px;
+					margin-bottom: -8px;
+				}
+			}
+		}
+	}
+}
