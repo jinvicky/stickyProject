@@ -65,12 +65,12 @@ const Home: FunctionalComponent = () => {
     const [center, setCenter] = useState({ x: 0, y: 0 });
 
     const setCenterOfBox = () => {
-        const b = document.getElementById("moveableBox");
-        if (b) {
-            const rect = b.getBoundingClientRect();
+        const mvbBox = document.getElementById("moveableBox");
+        if (mvbBox) {
+            const mvbPos = mvbBox.getBoundingClientRect();
             const center = {
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2,
+                x: mvbPos.left + mvbPos.width / 2,
+                y: mvbPos.top + mvbPos.height / 2,
             };
             setCenter(center);
         }
@@ -237,8 +237,9 @@ const Home: FunctionalComponent = () => {
                 newH = initH + rotatedHDiff;
 
                 newX += 0.5 * rotatedWDiff * cosFraction;
-                newY += 0.5 * rotatedWDiff * sinFraction;
                 newX -= 0.5 * rotatedHDiff * sinFraction;
+
+                newY += 0.5 * rotatedWDiff * sinFraction;
                 newY += 0.5 * rotatedHDiff * cosFraction;
 
                 repositBox(b);

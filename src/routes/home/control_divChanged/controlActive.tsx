@@ -243,7 +243,10 @@ const Home: FunctionalComponent = () => {
             case "edge":
                 calculateEdge(rotatedWDiff, rotatedHDiff);
         }
-        if (b) repositBox(b);
+        if (b) {
+            repositBox(b);
+        }
+
     };
 
     const resizeEnd = () => {
