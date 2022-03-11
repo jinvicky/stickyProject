@@ -3,7 +3,10 @@ export type Dot = {
 	y: number
 };
 
-export type LocationObj = {
+export type RectDots = {
 	[key: string]: { x: number, y: number };
 }
 
+export enum ResizeType {
+	horiz, vertcl, corner
+}

@@ -1,19 +1,19 @@
 import { Fragment, FunctionalComponent, h } from 'preact';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import style from './dragUpgrade.scss';
-import { Dot, LocationObj } from '../type';
+import { Dot, RectDots } from '../type';
 
 let imgOffset = { x: 0, y: 0 };
 
 //global로 선언해야 함.
 //네 점의 순서는 시계방향으로 픽스. 
-const cLocation: LocationObj = {
+const cLocation: RectDots = {
     c1: { x: 0, y: 0 },
     c2: { x: 0, y: 0 },
     c3: { x: 0, y: 0 },
     c4: { x: 0, y: 0 },
 };
-const iLocation: LocationObj = {
+const iLocation: RectDots = {
     i1: { x: 0, y: 0 },
     i2: { x: 0, y: 0 },
     i3: { x: 0, y: 0 },
@@ -59,38 +59,9 @@ const Home: FunctionalComponent = () => {
 
     const [imgOut, setImgOut] = useState(false);
 
-    //이미지를 튕길 지 말지 여부를 검사하기.
-    const imgFlipValidation = () => {
-
-        getPositionOfImg();
-
-        if (isImgOutOfCanvas() && !areLinesIntersected())
-            setImgOut(true);
-        else setImgOut(false);
-    };
-
-    const isImgOutOfCanvas = (): boolean => {
-        const i = document.getElementById("img");
-        const c = document.getElementById("canvas");
-        if (i && c) {
-            const iRect = i.getBoundingClientRect();
-            const cRect = c.getBoundingClientRect();
-
-            if (iRect.left < cRect.left ||
-                iRect.right > cRect.right ||
-                iRect.top < cRect.top ||
-                iRect.bottom > cRect.bottom)
-
-                return true;
-        }
-        return false;
-    };
-
     //선분 교차 여부 검사하기.
     const areLinesIntersected = (): boolean => {
-
         let isOut = false;
-
         for (let i = 1; i <= Object.keys(cLocation).length; i++) {
             for (let j = 1; j <= Object.keys(iLocation).length; j++) {
                 if (i === Object.keys(cLocation).length) {
@@ -124,6 +95,35 @@ const Home: FunctionalComponent = () => {
         }
         return isOut;
     };
+
+    //이미지를 튕길 지 말지 여부를 검사하기.
+    const imgFlipValidation = () => {
+
+        getPositionOfImg();
+
+        if (isImgOutOfCanvas() && !areLinesIntersected())
+            setImgOut(true);
+        else setImgOut(false);
+    };
+
+    const isImgOutOfCanvas = (): boolean => {
+        const i = document.getElementById("img"); // <img>를 의미.
+        const c = document.getElementById("canvas");
+        if (i && c) {
+            const iRect = i.getBoundingClientRect();
+            const cRect = c.getBoundingClientRect();
+
+            if (iRect.left < cRect.left ||
+                iRect.right > cRect.right ||
+                iRect.top < cRect.top ||
+                iRect.bottom > cRect.bottom)
+
+                return true;
+        }
+        return false;
+    };
+
+
 
     //선분 교차 여부 검사기가 사용하는 교차검사메서드
     const areDotsCollided = (p1: Dot, p2: Dot, p3: Dot, p4: Dot) => {
@@ -180,15 +180,6 @@ const Home: FunctionalComponent = () => {
             };
             setCenter(center);
         }
-
-        // const point = document.getElementById("centerPoint");
-        // if (point) {
-        //     const center = {
-        //         x: point?.getBoundingClientRect().left + point?.getBoundingClientRect().width,
-        //         y: point?.getBoundingClientRect().top + point?.getBoundingClientRect().height,
-        //     };
-        //     setCenter(center);
-        // }
     };
 
     const rotateBox = (e: MouseEvent) => {
@@ -253,7 +244,6 @@ const Home: FunctionalComponent = () => {
                     setRotate(false);
                     setDrag(false);
                     flipImg();
-
                 }}
             >
                 <div

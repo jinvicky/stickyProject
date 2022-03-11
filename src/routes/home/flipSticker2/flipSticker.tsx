@@ -16,9 +16,9 @@ let newY = 0;
 
 let resizeFromW = 1;
 let resizeFromN = 1;
-
 let resizeSetting = 0;
 let imgOffset = { x: 0, y: 0 };
+let bounceState = false;
 
 const canvasDots: RectDots = {
     c1: { x: 0, y: 0 },
@@ -33,10 +33,9 @@ const controlDots: RectDots = {
     i4: { x: 0, y: 0 },
 };
 
-let bounceState = false;
 const Home: FunctionalComponent = () => {
 
-    const [file, setFile] = useState("");
+    const [file, setFile] = useState("fliptesting");
     const [mvbBoxPos, setMvbBoxPos] = useState({ top: 400, left: 400 });
     const [center, setCenter] = useState({ x: 0, y: 0 });
     const [degree, setDegree] = useState(0);
@@ -52,7 +51,6 @@ const Home: FunctionalComponent = () => {
             canvasDots.c4 = { x: canvPos.left, y: canvPos.bottom };
         }
     };
-
     const cornArr = ["nw", "ne", "se", "sw"];
 
     const getPosOfControlDots = () => {
@@ -67,7 +65,6 @@ const Home: FunctionalComponent = () => {
             }
         }
     };
-
     const areLinesIntersected = (): boolean => {
         let isOut = false;
         for (let i = 1; i <= Object.keys(canvasDots).length; i++) {
@@ -103,7 +100,6 @@ const Home: FunctionalComponent = () => {
         }
         return isOut;
     };
-
     const areDotsCollided = (p1: Dot, p2: Dot, p3: Dot, p4: Dot) => {
 
         if (Math.max(p1.x, p2.x) < Math.min(p3.x, p4.x)) return false;
@@ -119,8 +115,7 @@ const Home: FunctionalComponent = () => {
         if (sign1 == 0 && sign2 == 0 && sign3 == 0 && sign4 == 0) return true;
         return sign1 * sign2 <= 0 && sign3 * sign4 <= 0;
     };
-
-    const imgFlipValidation = () => {
+    const imgBounceValidation = () => {
         getPosOfControlDots();
         if (areControlDotsOutOfCanvas() && !areLinesIntersected()) bounceState = true;
         else bounceState = false;
@@ -179,7 +174,7 @@ const Home: FunctionalComponent = () => {
         setMouseOffset(e);
         savePosOfCanvas();
         window.addEventListener("mousemove", movePosOfBox);
-        window.addEventListener("mousemove", imgFlipValidation);
+        window.addEventListener("mousemove", imgBounceValidation);
         window.addEventListener("mouseup", dragEnd);
         window.addEventListener("mouseup", flipImg);
     }, []);
@@ -201,9 +196,9 @@ const Home: FunctionalComponent = () => {
     const setMouseOffset = (e: MouseEvent) => {
         const i = document.getElementById("mouseOffset");
         if (i) {
-            const img = i?.getBoundingClientRect();
-            imgOffset.x = Math.round(e.clientX - img.left);
-            imgOffset.y = Math.round(e.clientY - img.top);
+            const offset = i?.getBoundingClientRect();
+            imgOffset.x = Math.round(e.clientX - offset.left);
+            imgOffset.y = Math.round(e.clientY - offset.top);
         }
     }
     const setCenterOfMvbBox = () => {
@@ -270,7 +265,6 @@ const Home: FunctionalComponent = () => {
         resizeFromN = 1;
     };
     const calByResizeType = (resizeSetting: ResizeType, rotatedWDiff: number, rotatedHDiff: number) => {
-
         const calWidth = initW + rotatedWDiff * resizeFromW;
         const calHeight = initH + rotatedHDiff * resizeFromN;
 
@@ -337,9 +331,8 @@ const Home: FunctionalComponent = () => {
 
                 // W를 기준으로 크기를 조정할떄
                 // newW 가 0 보다 작아지거나 0이되면 이제 E방향으로 이벤트가 발생하면됩니다.
-                // 이유는 현재 위치에서 왼쪽 축을기준으로 오른쪽방향으로 커져하기때문에
+                // 이유는 현재 위치에서 왼쪽 축을기준으로 오른쪽방향으로 커져야하기때문에
 
-                resizeFromW = 1;
             }
         }
     };
@@ -397,7 +390,9 @@ const Home: FunctionalComponent = () => {
                             left: mvbBoxPos.left,
                             top: mvbBoxPos.top,
                             transform: `translate(-50%, -50%) rotate(${degree}deg)`,
-                            display: cActive ? "block" : "none"
+                            display: cActive ? "block" : "none",
+                            width: 500,
+                            height: 280,
                         }}
                     >
                         <div class={style.targetLine}>
@@ -435,8 +430,9 @@ const Home: FunctionalComponent = () => {
                                 style={{
                                     left: mvbBoxPos.left,
                                     top: mvbBoxPos.top,
-                                    transform: `translate(-50%, -50%)
-                                    rotate(${degree}deg)`
+                                    transform: `translate(-50%, -50%) rotate(${degree}deg)`,
+                                    width: 500,
+                                    height: 281,
                                 }}
                                 onMouseDown={(e) => {
                                     e.preventDefault();
@@ -447,8 +443,8 @@ const Home: FunctionalComponent = () => {
                                 <img
                                     id="sticker"
                                     class={style.sticker}
-                                    // src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
-                                    src={file}
+                                    src="https://i.ytimg.com/vi/JVzwiFKfLEU/hq720_live.jpg?sqp=CMDd4JAG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLC98d0XVx3vMyvPP_CHzugjSeiGkQ"
+                                    // src={file}
                                     onLoad={(e) => {
                                         setFileSizeToSticker(e);
                                         setCActive(true);
